@@ -143,24 +143,32 @@ class Queen(Piece):
 
                 self.legal_moves.append((self.file, i))
 
-            # For Diagonal Moves
+            # For Diagonal Moves To the Top right
 
             for i in range(self.file + 1, 9):
-
-                for j in range(self.rank + 1, 9):
-
-                    self.legal_moves.append((i, j))
-
-            for i in range(self.file + 1, 9):
-
-                for j in range(1, self.rank):
-                    
-                    self.legal_moves.append((i, j))
-            for i in range(1, self.file):
                 
-                for j in range(self.rank + 1, 9):
-                    
-                    self.legal_moves.append((i, j))
+                self.legal_moves.append((i,i))
+            # For the Diagonal Moves to the Top Left
+
+            """
+            This may seem like a long way but it's important for code readablity:
+            (i-self.file) is the difference between the selected square's file and the current square's file.
+            I could write it like (self.file - i+ self.file) but i did ts to make the code more readable
+            """
+            for i in range(self.file + 1, 9):
+
+                self.legal_moves.append((self.file-(i-self.file), i))
+
+            # For Diagonal Moves to the bottom left
+
+            for i in range(1, self.file):
+
+                self.legal_moves.append((i,i))
+
+            # For Diagonal Moves to the bottom right
+
+                self.legal_moves.append((self.file-(i-self.file), i))
+            
 
             print(self.legal_moves)
 
@@ -170,7 +178,7 @@ class Queen(Piece):
 
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
-queen = Queen(4,4)
+queen = Queen(6,4)
 
 
 
