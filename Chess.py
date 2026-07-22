@@ -77,9 +77,9 @@ class ChessGame:
 
             self.draw_board()
 
-            queen.see_legal_moves()
+            king.see_legal_moves()
 
-            pygame.draw.rect(screen, green, (queen.pos_x,queen.pos_y, unit, unit))
+            pygame.draw.rect(screen, green, (king.pos_x,king.pos_y, unit, unit))
 
             pygame.display.flip()
 
@@ -128,7 +128,7 @@ class Queen(Piece):
 
             # To the Left
 
-            for i in range(1, self.file):
+            for i in range(self.file - 1, 0, -1):
 
                 self.legal_moves.append((i, self.rank))
 
@@ -139,35 +139,32 @@ class Queen(Piece):
 
             # For Down
 
-            for i in range(1, self.rank):
+            for i in range(self.rank - 1 , 0, -1):
 
                 self.legal_moves.append((self.file, i))
 
             # For Diagonal Moves To the Top right
 
-            for i in range(self.file + 1, 9):
+            for i in range (1, 9):
                 
-                self.legal_moves.append((i,i))
+                self.legal_moves.append((self.file  + i, self.rank + i))
+
             # For the Diagonal Moves to the Top Left
+            
+            for i in range(1, 9):
 
-            """
-            This may seem like a long way but it's important for code readablity:
-            (i-self.file) is the difference between the selected square's file and the current square's file.
-            I could write it like (self.file - i+ self.file) but i did ts to make the code more readable
-            """
-            for i in range(self.file + 1, 9):
-
-                self.legal_moves.append((self.file-(i-self.file), i))
+                self.legal_moves.append((self.file - i, self.rank + i))
 
             # For Diagonal Moves to the bottom left
 
-            for i in range(1, self.file):
+            for i in range(1, 9):
 
-                self.legal_moves.append((i,i))
+                self.legal_moves.append((self.file-i,self.rank - i))
 
             # For Diagonal Moves to the bottom right
+            for i in range(1,9):
 
-                self.legal_moves.append((self.file-(i-self.file), i))
+                self.legal_moves.append((self.file + i,self.rank - i))
             
 
             print(self.legal_moves)
@@ -178,16 +175,164 @@ class Queen(Piece):
 
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
-queen = Queen(6,4)
+
+
+class Rook(Piece):
+    def __init__(self, file, rank):
+        super().__init__(file, rank)
+
+    legal_moves = []
+    def see_legal_moves(self):
+        if len(self.legal_moves) == 0:
+
+            # To the Right
+            for i in range(self.file + 1, 9):
+
+                self.legal_moves.append((i, self.rank))
+
+            # To the Left
+
+            for i in range(self.file - 1, 0, -1):
+
+                self.legal_moves.append((i, self.rank))
+
+            # For Up
+            for i in range(self.rank + 1, 9):
+
+                self.legal_moves.append((self.file, i))
+
+            # For Down
+
+            for i in range(self.rank - 1 , 0, -1):
+
+                self.legal_moves.append((self.file, i))
+
+
+        
+        for legal_move in self.legal_moves:
+
+            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+
+class Bishop(Piece):
+
+    def __init__(self, file, rank):
+
+        super().__init__(file, rank)
+
+    legal_moves = []
+    def see_legal_moves(self):
+        if len(self.legal_moves) == 0:
+
+            # For Diagonal Moves To the Top right
+
+            for i in range (1, 9):
+                
+                self.legal_moves.append((self.file  + i, self.rank + i))
+
+            # For the Diagonal Moves to the Top Left
+            
+            for i in range(1, 9):
+
+                self.legal_moves.append((self.file - i, self.rank + i))
+
+            # For Diagonal Moves to the bottom left
+
+            for i in range(1, 9):
+
+                self.legal_moves.append((self.file-i,self.rank - i))
+
+            # For Diagonal Moves to the bottom right
+            for i in range(1,9):
+
+                self.legal_moves.append((self.file + i,self.rank - i))
+            
+
+            print(self.legal_moves)
+
+        for legal_move in self.legal_moves:
+
+            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10) 
+class Knight(Piece):
+    def __init__(self, file, rank):
+
+        super().__init__(file, rank)
+    
+    legal_moves = []
+
+    def see_legal_moves(self):
+        
+        if len(self.legal_moves) == 0:
+            # Go 1 square to the right and 2 squares above
+            self.legal_moves.append((self.file + 1, self.rank + 2))
+
+            # Go 1 square to the left and 2 squares above
+            self.legal_moves.append((self.file - 1, self.rank + 2))
+
+            # Go 2 squares to the right and 1 square above
+            self.legal_moves.append((self.file + 2, self.rank + 1))
+
+            # Go 2 squares to the left and 1 square above
+            self.legal_moves.append((self.file - 2, self.rank + 1))
+
+            # Go 2 squares to the right and 1 square below
+            self.legal_moves.append((self.file + 2, self.rank - 1))
+
+            # Go 2 squares to the left and 1 square below
+            self.legal_moves.append((self.file - 2, self.rank - 1))
+
+            # Go 1 squares to the right and 2 squares below
+            self.legal_moves.append((self.file + 1, self.rank - 2))
+
+            # Go 1 squares to the left and 2 squares below
+            self.legal_moves.append((self.file - 1, self.rank - 2))
+
+        for legal_move in self.legal_moves:
+            
+            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+
+class King(Piece):
+
+    def __init__(self, file, rank):
+
+        super().__init__(file, rank)
+
+    legal_moves = []
+    
+    def see_legal_moves(self):
+
+        if len(self.legal_moves) == 0:
+
+            self.legal_moves.append((self.file + 1, self.rank + 1))
+
+            self.legal_moves.append((self.file + 1, self.rank - 1))
+
+            self.legal_moves.append((self.file + 1, self.rank))
+
+            self.legal_moves.append((self.file - 1, self.rank + 1))
+
+            self.legal_moves.append((self.file - 1, self.rank - 1))
+
+            self.legal_moves.append((self.file - 1, self.rank))
+
+            self.legal_moves.append((self.file, self.rank + 1))
+
+            self.legal_moves.append((self.file, self.rank - 1))
+
+        for legal_moves in self.legal_moves:
+            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_moves[0], legal_moves[1]), 10)
 
 
 
 
+queen = Queen(4, 5)
 
+rook = Rook(4,5)
 
-pawn1 = Pawn(2, 5)
+bishop = Bishop(4, 5)
 
-print(pawn1.pos_x, pawn1.pos_y)
+knight = Knight(4, 6)
+
+king = King(8, 7)
 
 chess_game = ChessGame()
 
