@@ -14,6 +14,20 @@ light = (118, 150, 86)
 
 green = (0, 255, 0)
 
+font = pygame.font.SysFont("segoeuisymbol", 64)
+
+Piece_symbols = {
+    'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',  # white
+        'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟',  # black
+    }
+
+board = [(1, 1, 'R'), (2, 1, 'N'), (3, 1, 'B'), (4, 1, 'Q'), (5, 1, 'K'), (6, 1, 'B'), (7, 1, 'N'), (8, 1, 'R'),
+         (1, 2, 'P'), (2, 2, 'P'), (3, 2, 'P'), (4, 2, 'P'), (5, 2, 'P'), (6, 2, 'P'), (7, 2, 'P'), (8, 2, 'P'),
+
+         (1, 7, 'p'), (2, 7, 'p'), (3, 7, 'p'), (4, 7, 'p'), (5, 7, 'p'), (6, 7, 'p'), (7, 7, 'p'), (8, 7, 'p'),
+
+         (1, 8, 'r'), (2, 8, 'n'), (3, 8, 'b'), (4, 8, 'q'), (5, 8, 'k'), (6, 8, 'b'), (7， 8, 'n'), (8， 8,'r')]
+
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 turn = "white"
@@ -38,6 +52,14 @@ def convert_into_pos_for_circles(file, rank):
 
 
 class ChessGame:
+    def draw_piece(self, piece, file, rank):
+
+        symbol_surface = font.render(piece,True, (0,0,0))
+
+        symbol_surface.blit(symbol_surface, convert_into_pos(file, rank))
+
+
+
     def draw_board(self):
 
         first_light = False
