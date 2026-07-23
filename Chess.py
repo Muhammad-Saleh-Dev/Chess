@@ -2,15 +2,15 @@ import sys
 
 import pygame
 
-screen_height = 800
+screen_height = 600 
 
-screen_width = 800
+screen_width = 600
 
-unit = 100
+unit = 100 * 6 // 8
 
-red = (255, 0, 0)
+dark = (238, 238, 210)
 
-blue = (0, 0, 255)
+light = (118, 150, 86)
 
 green = (0, 255, 0)
 
@@ -33,32 +33,32 @@ def convert_into_pos(file, rank):
 
 def convert_into_pos_for_circles(file, rank):
 
-    return ((file - 1) * unit + 50, ((8 - rank) * unit) + 50)
+    return ((file - 1) * unit + (unit/2), ((8 - rank) * unit) + (unit/2))
 
 
 
 class ChessGame:
     def draw_board(self):
 
-        first_red = False
+        first_light = False
         
         for y in range(0,8):
-            if first_red:
+            if first_light:
                 for x in range(0,8,2):
-                    pygame.draw.rect(screen, red, (x * unit, y * unit, unit, unit))
+                    pygame.draw.rect(screen, light, (x * unit, y * unit, unit, unit))
 
                 for x in range(1,8,2):
-                    pygame.draw.rect(screen, blue, (x * unit, y * unit, unit, unit))
+                    pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
 
             else:
                 for x in range(0,8,2):
-                    pygame.draw.rect(screen, blue, (x * unit, y * unit, unit, unit))
+                    pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
 
                 for x in range(1,8,2):
-                    pygame.draw.rect(screen, red, (x * unit, y * unit, unit, unit))
+                    pygame.draw.rect(screen, light, (x * unit, y * unit, unit, unit))
 
 
-            first_red = not first_red
+            first_light = not first_light
                 
             
 
