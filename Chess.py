@@ -29,13 +29,13 @@ PIECE_SYMBOLS = {
     'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟',  # black
 }
 
-board = [("R", 1, 1), ("N", 2, 1), ("B", 3, 1), ("Q", 4, 1), ("K", 5, 1), ("B", 6, 1), ("N", 7, 1), ("R", 8, 1),
-         
-         ("P", 1, 2), ("P", 2, 2), ("P", 3, 2), ("P", 4, 2), ("P", 5, 2), ("P", 6, 2), ("P", 7, 2), ("P", 8, 2),
+board = [(Rook(1, 1)), (Knight(2, 1)), (Bishop(3, 1)), (Queen(4, 1)), (King(5, 1)), (Bishop(6, 1)), (Knight(7, 1)), (Rook(8, 1)),
 
-         ("p", 1, 7), ("p", 2, 7), ("p", 3, 7), ("p", 4, 7), ("p", 5, 7), ("p", 6, 7), ("p", 7, 7), ("p", 8, 7),
+         (Pawn(1, 2)), (Pawn(2, 2)), (Pawn(3, 2)), (Pawn(4, 2)), (Pawn(5, 2)), (Pawn(6, 2)), (Pawn(7, 2)), (Pawn(8, 2)),
 
-         ("r", 1, 8), ("n", 2, 8), ("b", 3, 8), ("q", 4, 8), ("k", 5, 8), ("b", 6, 8), ("n", 7, 8), ("r", 8, 8)]
+         (Pawn(1, 7)), (Pawn(2, 7)), (Pawn(3, 7)), (Pawn(4, 7)), (Pawn(5, 7)), (Pawn(6, 7)), (Pawn(7, 7)), (Pawn(8, 7)),
+
+         (Rook(1, 8)), (Knight(2, 8)), (Bishop(3, 8)), (Queen(4, 8)), (King(5, 8)), (Bishop(6, 8)), (Knight(7, 8)), (Rook(8, 8))]
 
 def convert_into_pos(file, rank):
 
@@ -54,16 +54,8 @@ def convert_into_pos_for_pieces(file, rank):
 class ChessGame:
     def draw_piece(self, piece, file, rank):
 
-        # Checks if the piece is black or white and draws it accordingly
-
-        if piece.lower() == piece:
-
-            text_surface = font.render(PIECE_SYMBOLS[piece], True, (0, 0, 0))
-
-        else:
-
-            text_surface = font.render(PIECE_SYMBOLS[piece], True, (255, 255, 255))
-
+        text_surface = font.render(PIECE_SYMBOLS[piece], True, (0,0,0))
+                   
         screen.blit(text_surface, convert_into_pos_for_pieces(file, rank))
         
     def draw_board(self):
@@ -124,7 +116,7 @@ class Piece:
 class Pawn(Piece):
 
     def __init__(self, file, rank):
-
+        self.symbol = "p"
         super().__init__(file, rank)
 
     def see_legal_moves(self):
@@ -141,6 +133,8 @@ class Pawn(Piece):
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 class Queen(Piece):
     def __init__(self, file, rank):
+
+        self.symbol = "q"
 
         super().__init__(file, rank)
 
@@ -207,6 +201,9 @@ class Queen(Piece):
 
 class Rook(Piece):
     def __init__(self, file, rank):
+
+        self.symbol = "r"
+
         super().__init__(file, rank)
 
     legal_moves = []
@@ -244,6 +241,8 @@ class Rook(Piece):
 class Bishop(Piece):
 
     def __init__(self, file, rank):
+        
+        self.symbol = "b"
 
         super().__init__(file, rank)
 
@@ -283,6 +282,8 @@ class Bishop(Piece):
 class Knight(Piece):
     def __init__(self, file, rank):
 
+        self.symbol = "n"
+
         super().__init__(file, rank)
     
     legal_moves = []
@@ -321,6 +322,8 @@ class Knight(Piece):
 class King(Piece):
 
     def __init__(self, file, rank):
+
+        self.symbol = "k"
 
         super().__init__(file, rank)
 
