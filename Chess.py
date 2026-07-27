@@ -2,6 +2,8 @@ import sys
 
 import pygame
 
+pygame.init()
+
 screen_height = 600 
 
 screen_width = 600
@@ -14,32 +16,26 @@ light = (118, 150, 86)
 
 green = (0, 255, 0)
 
-font = pygame.font.SysFont("segoeuisymbol", 64)
-
-Piece_symbols = {
-    'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',  # white
-        'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟',  # black
-    }
-
-board = [(1, 1, 'R'), (2, 1, 'N'), (3, 1, 'B'), (4, 1, 'Q'), (5, 1, 'K'), (6, 1, 'B'), (7, 1, 'N'), (8, 1, 'R'),
-         (1, 2, 'P'), (2, 2, 'P'), (3, 2, 'P'), (4, 2, 'P'), (5, 2, 'P'), (6, 2, 'P'), (7, 2, 'P'), (8, 2, 'P'),
-
-         (1, 7, 'p'), (2, 7, 'p'), (3, 7, 'p'), (4, 7, 'p'), (5, 7, 'p'), (6, 7, 'p'), (7, 7, 'p'), (8, 7, 'p'),
-
-         (1, 8, 'r'), (2, 8, 'n'), (3, 8, 'b'), (4, 8, 'q'), (5, 8, 'k'), (6, 8, 'b'), (7， 8, 'n'), (8， 8,'r')]
-
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 turn = "white"
 
 pygame.display.set_caption("Chess")
 
-positions = []
-for i in range(1,9):
+font = pygame.font.SysFont("segoeuisymbol", unit - 10)
 
-    for j in range(1,9):
+PIECE_SYMBOLS = {
+    'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',  # white
+    'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟',  # black
+}
 
-        positions.append((i,j))
+board = [("R", 1, 1), ("N", 2, 1), ("B", 3, 1), ("Q", 4, 1), ("K", 5, 1), ("B", 6, 1), ("N", 7, 1), ("R", 8, 1),
+         
+         ("P", 1, 2), ("P", 2, 2), ("P", 3, 2), ("P", 4, 2), ("P", 5, 2), ("P", 6, 2), ("P", 7, 2), ("P", 8, 2),
+
+         ("p", 1, 7), ("p", 2, 7), ("p", 3, 7), ("p", 4, 7), ("p", 5, 7), ("p", 6, 7), ("p", 7, 7), ("p", 8, 7),
+
+         ("r", 1, 8), ("n", 2, 8), ("b", 3, 8), ("q", 4, 8), ("k", 5, 8), ("b", 6, 8), ("n", 7, 8), ("r", 8, 8)]
 
 def convert_into_pos(file, rank):
 
@@ -49,17 +45,27 @@ def convert_into_pos_for_circles(file, rank):
 
     return ((file - 1) * unit + (unit/2), ((8 - rank) * unit) + (unit/2))
 
+def convert_into_pos_for_pieces(file, rank):
+
+    return ((file - 1) * unit + 4, ((8 - rank) * unit)-2)
+
 
 
 class ChessGame:
     def draw_piece(self, piece, file, rank):
 
-        symbol_surface = font.render(piece,True, (0,0,0))
+        # Checks if the piece is black or white and draws it accordingly
 
-        symbol_surface.blit(symbol_surface, convert_into_pos(file, rank))
+        if piece.lower() == piece:
 
+            text_surface = font.render(PIECE_SYMBOLS[piece], True, (0, 0, 0))
 
+        else:
 
+            text_surface = font.render(PIECE_SYMBOLS[piece], True, (255, 255, 255))
+
+        screen.blit(text_surface, convert_into_pos_for_pieces(file, rank))
+        
     def draw_board(self):
 
         first_light = False
@@ -81,7 +87,9 @@ class ChessGame:
 
 
             first_light = not first_light
-                
+
+        for piece in board:
+            self.draw_piece(*piece)
             
 
     def run(self):
@@ -99,9 +107,7 @@ class ChessGame:
 
             self.draw_board()
 
-            king.see_legal_moves()
-
-            pygame.draw.rect(screen, green, (king.pos_x,king.pos_y, unit, unit))
+            self.draw_piece("K", 5, 1)
 
             pygame.display.flip()
 
