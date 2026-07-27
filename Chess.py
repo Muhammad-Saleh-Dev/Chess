@@ -29,13 +29,6 @@ PIECE_SYMBOLS = {
     'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟',  # black
 }
 
-board = [(Rook(1, 1)), (Knight(2, 1)), (Bishop(3, 1)), (Queen(4, 1)), (King(5, 1)), (Bishop(6, 1)), (Knight(7, 1)), (Rook(8, 1)),
-
-         (Pawn(1, 2)), (Pawn(2, 2)), (Pawn(3, 2)), (Pawn(4, 2)), (Pawn(5, 2)), (Pawn(6, 2)), (Pawn(7, 2)), (Pawn(8, 2)),
-
-         (Pawn(1, 7)), (Pawn(2, 7)), (Pawn(3, 7)), (Pawn(4, 7)), (Pawn(5, 7)), (Pawn(6, 7)), (Pawn(7, 7)), (Pawn(8, 7)),
-
-         (Rook(1, 8)), (Knight(2, 8)), (Bishop(3, 8)), (Queen(4, 8)), (King(5, 8)), (Bishop(6, 8)), (Knight(7, 8)), (Rook(8, 8))]
 
 def convert_into_pos(file, rank):
 
@@ -49,75 +42,36 @@ def convert_into_pos_for_pieces(file, rank):
 
     return ((file - 1) * unit + 4, ((8 - rank) * unit)-2)
 
+def convert_into_file_rank(x, y):
+
+    return ((x // unit) + 1, 8 - (y // unit))
 
 
-class ChessGame:
-    def draw_piece(self, piece, file, rank):
-
-        text_surface = font.render(PIECE_SYMBOLS[piece], True, (0,0,0))
-                   
-        screen.blit(text_surface, convert_into_pos_for_pieces(file, rank))
-        
-    def draw_board(self):
-
-        first_light = False
-        
-        for y in range(0,8):
-            if first_light:
-                for x in range(0,8,2):
-                    pygame.draw.rect(screen, light, (x * unit, y * unit, unit, unit))
-
-                for x in range(1,8,2):
-                    pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
-
-            else:
-                for x in range(0,8,2):
-                    pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
-
-                for x in range(1,8,2):
-                    pygame.draw.rect(screen, light, (x * unit, y * unit, unit, unit))
-
-
-            first_light = not first_light
-
-        for piece in board:
-            self.draw_piece(*piece)
-            
-
-    def run(self):
-        running = True
-        while running:
-
-            for event in pygame.event.get():
-
-                if event.type == pygame.QUIT:
-
-                    running= False
-
-            
-            screen.fill((255, 0, 0))
-
-            self.draw_board()
-
-            self.draw_piece("K", 5, 1)
-
-            pygame.display.flip()
 
 class Piece:
-    def __init__(self, file, rank):
+    def __init__(self, file, rank, colour):
 
         self.file = file
 
         self.rank = rank
 
-        self.pos_x, self.pos_y = convert_into_pos(self.file,self.rank)
+        self.colour = colour
 
-        
+        self.pos_x, self.pos_y = convert_into_pos(self.file,self.rank)
+ 
 class Pawn(Piece):
 
-    def __init__(self, file, rank):
-        self.symbol = "p"
-        super().__init__(file, rank)
+    def __init__(self, file, rank, colour):
+
+        super().__init__(file, rank, colour)
+
+        if colour == "w":
+
+            self.symbol = "P"
+
+        else:
+
+            self.symbol = "p"
 
     def see_legal_moves(self):
 
@@ -131,12 +85,19 @@ class Pawn(Piece):
         for legal_move in legal_moves:
             
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+
 class Queen(Piece):
-    def __init__(self, file, rank):
+    def __init__(self, file, rank, colour):
 
-        self.symbol = "q"
+        super().__init__(file, rank, colour)
 
-        super().__init__(file, rank)
+        if colour == "w":
+
+            self.symbol = "Q"
+
+        else:
+
+            self.symbol = "q"
 
     legal_moves = []
 
@@ -168,25 +129,33 @@ class Queen(Piece):
             # For Diagonal Moves To the Top right
 
             for i in range (1, 9):
-                
-                self.legal_moves.append((self.file  + i, self.rank + i))
+
+                if self.file + i < 9 and self.rank + i < 9:
+
+                    self.legal_moves.append((self.file  + i, self.rank + i))
 
             # For the Diagonal Moves to the Top Left
             
             for i in range(1, 9):
 
-                self.legal_moves.append((self.file - i, self.rank + i))
+                if self.file + i < 9 and self.rank + i < 9:
+
+                    self.legal_moves.append((self.file - i, self.rank + i))
 
             # For Diagonal Moves to the bottom left
 
             for i in range(1, 9):
 
-                self.legal_moves.append((self.file-i,self.rank - i))
+                if self.file + i < 9 and self.rank + i < 9:
+
+                    self.legal_moves.append((self.file-i,self.rank - i))
 
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
 
-                self.legal_moves.append((self.file + i,self.rank - i))
+                if self.file + i < 9 and self.rank + i < 9:
+                    
+                    self.legal_moves.append((self.file + i,self.rank - i))
             
 
             print(self.legal_moves)
@@ -197,14 +166,18 @@ class Queen(Piece):
 
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
-
-
 class Rook(Piece):
-    def __init__(self, file, rank):
+    def __init__(self, file, rank, colour):
 
-        self.symbol = "r"
+        super().__init__(file, rank, colour)
 
-        super().__init__(file, rank)
+        if colour == "w":
+
+            self.symbol = "R"
+
+        else:
+
+            self.symbol = "r"
 
     legal_moves = []
     def see_legal_moves(self):
@@ -240,11 +213,17 @@ class Rook(Piece):
 
 class Bishop(Piece):
 
-    def __init__(self, file, rank):
-        
-        self.symbol = "b"
+    def __init__(self, file, rank, colour):
 
-        super().__init__(file, rank)
+        super().__init__(file, rank, colour)
+
+        if colour == "w":
+
+            self.symbol = "B"
+
+        else:
+
+            self.symbol = "b"
 
     legal_moves = []
     def see_legal_moves(self):
@@ -253,39 +232,51 @@ class Bishop(Piece):
             # For Diagonal Moves To the Top right
 
             for i in range (1, 9):
-                
-                self.legal_moves.append((self.file  + i, self.rank + i))
+
+                if self.file + i < 9 and self.rank + i < 9:
+
+                    self.legal_moves.append((self.file  + i, self.rank + i))
 
             # For the Diagonal Moves to the Top Left
             
             for i in range(1, 9):
 
-                self.legal_moves.append((self.file - i, self.rank + i))
+                if self.file + i < 9 and self.rank + i < 9:
+
+                    self.legal_moves.append((self.file - i, self.rank + i))
 
             # For Diagonal Moves to the bottom left
 
             for i in range(1, 9):
 
-                self.legal_moves.append((self.file-i,self.rank - i))
+                if self.file + i < 9 and self.rank + i < 9:
+
+                    self.legal_moves.append((self.file-i,self.rank - i))
 
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
 
-                self.legal_moves.append((self.file + i,self.rank - i))
+                if self.file + i < 9 and self.rank + i < 9:
+                    
+                    self.legal_moves.append((self.file + i,self.rank - i))
             
-
-            print(self.legal_moves)
-
         for legal_move in self.legal_moves:
 
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10) 
+
 class Knight(Piece):
-    def __init__(self, file, rank):
+    def __init__(self, file, rank, colour):
 
-        self.symbol = "n"
+        if colour == "w":
 
-        super().__init__(file, rank)
-    
+            self.symbol = "N"
+
+        else:
+
+            self.symbol = "n"
+
+        super().__init__(file, rank, colour)
+
     legal_moves = []
 
     def see_legal_moves(self):
@@ -321,17 +312,24 @@ class Knight(Piece):
 
 class King(Piece):
 
-    def __init__(self, file, rank):
+    def __init__(self, file, rank, colour):
 
-        self.symbol = "k"
+        super().__init__(file, rank, colour)
 
-        super().__init__(file, rank)
+        if colour == "w":
+
+            self.symbol = "K"
+        else:
+
+            self.symbol = "k"
 
     legal_moves = []
     
     def see_legal_moves(self):
+        print("TS working 2")
 
         if len(self.legal_moves) == 0:
+            print("and ts 2")
 
             self.legal_moves.append((self.file + 1, self.rank + 1))
 
@@ -349,21 +347,92 @@ class King(Piece):
 
             self.legal_moves.append((self.file, self.rank - 1))
 
-        for legal_moves in self.legal_moves:
-            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_moves[0], legal_moves[1]), 10)
+        for legal_move in self.legal_moves:
+            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+        print(self.legal_moves)
 
 
 
 
-queen = Queen(4, 5)
+board = [(Rook(1, 1, "w")), (Knight(2, 1, "w")), (Bishop(3, 1, "w")), (Queen(4, 1, "w")), (King(5, 1, "w")), (Bishop(6, 1, "w")), (Knight(7, 1, "w")), (Rook(8, 1, "w")),
 
-rook = Rook(4,5)
+         (Pawn(1, 2, "w")), (Pawn(2, 2, "w")), (Pawn(3, 2, "w")), (Pawn(4, 2, "w")), (Pawn(5, 2, "w")), (Pawn(6, 2, "w")), (Pawn(7, 2, "w")), (Pawn(8, 2, "w")),
 
-bishop = Bishop(4, 5)
+         (Pawn(1, 7, "b")), (Pawn(2, 7, "b")), (Pawn(3, 7, "b")), (Pawn(4, 7, "b")), (Pawn(5, 7, "b")), (Pawn(6, 7, "b")), (Pawn(7, 7, "b")), (Pawn(8, 7, "b")),
 
-knight = Knight(4, 6)
+         (Rook(1, 8, "b")), (Knight(2, 8, "b")), (Bishop(3, 8, "b")), (Queen(4, 8, "b")), (King(5, 8, "b")), (Bishop(6, 8, "b")), (Knight(7, 8, "b")), (Rook(8, 8, "b"))]
 
-king = King(8, 7)
+
+class ChessGame:
+    def check_where_clicked(self):
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+
+                    click_square = convert_into_file_rank(*event.pos)
+
+                    for piece in board:
+
+                        if (piece.file, piece.rank) == click_square:
+
+                            piece.see_legal_moves()
+
+                            print("function is working")
+
+
+    def draw_piece(self, piece, file, rank):
+
+        text_surface = font.render(PIECE_SYMBOLS[piece], True, (0,0,0))
+                   
+        screen.blit(text_surface, convert_into_pos_for_pieces(file, rank))
+        
+    def draw_board(self):
+
+        first_light = False
+        
+        for y in range(0,8):
+            if first_light:
+                for x in range(0,8,2):
+                    pygame.draw.rect(screen, light, (x * unit, y * unit, unit, unit))
+
+                for x in range(1,8,2):
+                    pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
+
+            else:
+                for x in range(0,8,2):
+                    pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
+
+                for x in range(1,8,2):
+                    pygame.draw.rect(screen, light, (x * unit, y * unit, unit, unit))
+
+
+            first_light = not first_light
+
+        for piece in board:
+
+            self.draw_piece(piece.symbol, piece.file, piece.rank)
+            
+
+    def run(self):
+        running = True
+        while running:
+
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+
+                    running= False
+
+            
+            screen.fill((255, 0, 0))
+
+            self.draw_board()
+
+            self.check_where_clicked()
+
+            pygame.display.flip()
+
 
 chess_game = ChessGame()
 
