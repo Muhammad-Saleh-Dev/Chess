@@ -138,7 +138,7 @@ class Queen(Piece):
             
             for i in range(1, 9):
 
-                if self.file + i < 9 and self.rank + i < 9:
+                if self.file - i > 0 and self.rank + i < 9:
 
                     self.legal_moves.append((self.file - i, self.rank + i))
 
@@ -146,20 +146,18 @@ class Queen(Piece):
 
             for i in range(1, 9):
 
-                if self.file + i < 9 and self.rank + i < 9:
+                if self.file - i > 0 and self.rank - i > 0:
 
                     self.legal_moves.append((self.file-i,self.rank - i))
 
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
 
-                if self.file + i < 9 and self.rank + i < 9:
-                    
-                    self.legal_moves.append((self.file + i,self.rank - i))
-            
+                if self.file + i < 9 and self.rank - i > 0:
+
+                    self.legal_moves.append((self.file + i, self.rank - i))        
 
             print(self.legal_moves)
-
 
 
         for legal_move in self.legal_moves:
@@ -241,7 +239,7 @@ class Bishop(Piece):
             
             for i in range(1, 9):
 
-                if self.file + i < 9 and self.rank + i < 9:
+                if self.file - i > 0 and self.rank + i < 9:
 
                     self.legal_moves.append((self.file - i, self.rank + i))
 
@@ -249,17 +247,17 @@ class Bishop(Piece):
 
             for i in range(1, 9):
 
-                if self.file + i < 9 and self.rank + i < 9:
+                if self.file - i > 0 and self.rank - i > 0:
 
                     self.legal_moves.append((self.file-i,self.rank - i))
 
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
 
-                if self.file + i < 9 and self.rank + i < 9:
+                if self.file + i < 9 and self.rank - i < 9:
                     
                     self.legal_moves.append((self.file + i,self.rank - i))
-            
+            print(self.legal_moves)
         for legal_move in self.legal_moves:
 
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10) 
@@ -364,21 +362,16 @@ board = [(Rook(1, 1, "w")), (Knight(2, 1, "w")), (Bishop(3, 1, "w")), (Queen(4, 
 
 
 class ChessGame:
-    def check_where_clicked(self):
+    def check_where_clicked(self, event):
+            click_square = convert_into_file_rank(*event.pos)
 
-        for event in pygame.event.get():
+            for piece in board:
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
+                if (piece.file, piece.rank) == click_square:
 
-                    click_square = convert_into_file_rank(*event.pos)
+                    piece.see_legal_moves()
 
-                    for piece in board:
-
-                        if (piece.file, piece.rank) == click_square:
-
-                            piece.see_legal_moves()
-
-                            print("function is working")
+                    print("function is working")
 
 
     def draw_piece(self, piece, file, rank):
@@ -424,12 +417,13 @@ class ChessGame:
 
                     running= False
 
-            
-            screen.fill((255, 0, 0))
-
             self.draw_board()
 
-            self.check_where_clicked()
+        
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+
+                    self.check_where_clicked(event)
 
             pygame.display.flip()
 
