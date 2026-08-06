@@ -100,6 +100,7 @@ class Pawn(Piece):
                     self.legal_moves = [(self.file, self.rank - 1)]
 
                 for legal_move in self.legal_moves:
+
                     pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class Queen(Piece):
@@ -171,9 +172,7 @@ class Queen(Piece):
 
                 if self.file + i < 9 and self.rank - i > 0:
 
-                    self.legal_moves.append((self.file + i, self.rank - i))        
-
-            print(self.legal_moves)
+                    self.legal_moves.append((self.file + i, self.rank - i))     
 
 
         for legal_move in self.legal_moves:
@@ -273,7 +272,8 @@ class Bishop(Piece):
                 if self.file + i < 9 and self.rank - i < 9:
                     
                     self.legal_moves.append((self.file + i,self.rank - i))
-            print(self.legal_moves)
+
+
         for legal_move in self.legal_moves:
 
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10) 
@@ -340,10 +340,8 @@ class King(Piece):
         self.legal_moves = []
     
     def see_legal_moves(self):
-        print("TS working 2")
 
         if len(self.legal_moves) == 0:
-            print("and ts 2")
 
             self.legal_moves.append((self.file + 1, self.rank + 1))
 
@@ -363,7 +361,6 @@ class King(Piece):
 
         for legal_move in self.legal_moves:
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
-        print(self.legal_moves)
 
 
 
@@ -439,17 +436,12 @@ class ChessGame:
             
                     self.check_where_clicked(event)
 
-                    if self.selected_piece is not None:
+                if self.selected_piece is not None:
 
-                        self.selected_piece.see_legal_moves()
+                    self.selected_piece.see_legal_moves()
 
             self.draw_board()
 
-        
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
-
-                    self.check_where_clicked(event)
             if self.selected_piece is not None:
                 self.selected_piece.see_legal_moves()
 
