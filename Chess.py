@@ -22,7 +22,7 @@ turn = "white"
 
 pygame.display.set_caption("Chess")
 
-font = pygame.font.SysFont("segoeuisymbol", unit - 10)
+font = pygame.font.SysFont("dejavusans", unit - 10)
 
 PIECE_SYMBOLS = {
     'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',  # white
@@ -40,7 +40,7 @@ def convert_into_pos_for_circles(file, rank):
 
 def convert_into_pos_for_pieces(file, rank):
 
-    return ((file - 1) * unit + 4, ((8 - rank) * unit)-2)
+    return ((file - 1) * unit + 6, ((8 - rank) * unit)-6)
 
 def convert_into_file_rank(x, y):
 
@@ -73,18 +73,34 @@ class Pawn(Piece):
 
             self.symbol = "p"
 
+        self.legal_moves = []
+
     def see_legal_moves(self):
 
-        if self.rank == 2:
+        if len(self.legal_moves) == 0:
+            if self.colour == "w":
 
-            legal_moves = [(self.file, self.rank + 1), (self.file, self.rank + 2)]
+                if self.rank == 2:
 
-        elif self.rank > 2:
-            legal_moves = [(self.file, self.rank + 1)]
+                    self.legal_moves = [(self.file, self.rank + 1), (self.file, self.rank + 2)]
 
-        for legal_move in legal_moves:
-            
-            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+                elif self.rank > 2:
+                    self.legal_moves = [(self.file, self.rank + 1)]
+
+                for legal_move in self.legal_moves:
+                    pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+
+            elif self.colour == "b":
+
+                if self.rank == 7:
+
+                    self.legal_moves = [(self.file, self.rank - 1), (self.file, self.rank - 2)]
+
+                elif self.rank < 7:
+                    self.legal_moves = [(self.file, self.rank - 1)]
+
+                for legal_move in self.legal_moves:
+                    pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class Queen(Piece):
     def __init__(self, file, rank, colour):
@@ -99,7 +115,7 @@ class Queen(Piece):
 
             self.symbol = "q"
 
-    legal_moves = []
+        self.legal_moves = []
 
     def see_legal_moves(self):
         if len(self.legal_moves) == 0:
@@ -177,7 +193,7 @@ class Rook(Piece):
 
             self.symbol = "r"
 
-    legal_moves = []
+        self.legal_moves = []
     def see_legal_moves(self):
         if len(self.legal_moves) == 0:
 
@@ -223,7 +239,7 @@ class Bishop(Piece):
 
             self.symbol = "b"
 
-    legal_moves = []
+        self.legal_moves = []
     def see_legal_moves(self):
         if len(self.legal_moves) == 0:
 
@@ -275,7 +291,7 @@ class Knight(Piece):
 
         super().__init__(file, rank, colour)
 
-    legal_moves = []
+        self.legal_moves = []
 
     def see_legal_moves(self):
         
@@ -321,7 +337,7 @@ class King(Piece):
 
             self.symbol = "k"
 
-    legal_moves = []
+        self.legal_moves = []
     
     def see_legal_moves(self):
         print("TS working 2")
@@ -362,6 +378,10 @@ board = [(Rook(1, 1, "w")), (Knight(2, 1, "w")), (Bishop(3, 1, "w")), (Queen(4, 
 
 
 class ChessGame:
+    def __init__(self):
+
+        self.selected_piece = None
+
     def check_where_clicked(self, event):
             click_square = convert_into_file_rank(*event.pos)
 
@@ -369,9 +389,7 @@ class ChessGame:
 
                 if (piece.file, piece.rank) == click_square:
 
-                    piece.see_legal_moves()
-
-                    print("function is working")
+                    self.selected_piece = piece
 
 
     def draw_piece(self, piece, file, rank):
@@ -416,6 +434,14 @@ class ChessGame:
                 if event.type == pygame.QUIT:
 
                     running= False
+                    
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+            
+                    self.check_where_clicked(event)
+
+                    if self.selected_piece is not None:
+
+                        self.selected_piece.see_legal_moves()
 
             self.draw_board()
 
@@ -424,6 +450,8 @@ class ChessGame:
                 if event.type == pygame.MOUSEBUTTONDOWN:
 
                     self.check_where_clicked(event)
+            if self.selected_piece is not None:
+                self.selected_piece.see_legal_moves()
 
             pygame.display.flip()
 
