@@ -2,6 +2,8 @@ import sys
 
 import pygame
 
+from platform import system
+
 pygame.init()
 
 screen_height = 600 
@@ -22,7 +24,15 @@ turn = "white"
 
 pygame.display.set_caption("Chess")
 
-font = pygame.font.SysFont("dejavusans", unit - 10)
+os = system()
+
+if os == "Linux":
+
+    font = pygame.font.SysFont("dejavusans", unit - 10)
+
+elif os == "Windows":
+
+    font = pygame.font.SysFont("segoeuisymbol", unit - 10)
 
 PIECE_SYMBOLS = {
     'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',  # white
@@ -40,11 +50,26 @@ def convert_into_pos_for_circles(file, rank):
 
 def convert_into_pos_for_pieces(file, rank):
 
-    return ((file - 1) * unit + 6, ((8 - rank) * unit)-6)
+    if os == "Windows":
+
+        return ((file - 1) * unit + 6, ((8 - rank) * unit)-6)
+
+    elif os == "Linux":
+
+        return ((file - 1) * unit + 10, ((8 - rank) * unit)-10)
 
 def convert_into_file_rank(x, y):
 
     return ((x // unit) + 1, 8 - (y // unit))
+
+
+def is_piece_on_ts_square(file, rank):
+
+    if any(piece.file == file and piece.rank == rank for piece in board):
+
+        return True
+    
+    return False
 
 
 
@@ -78,6 +103,7 @@ class Pawn(Piece):
     def see_legal_moves(self):
 
         if len(self.legal_moves) == 0:
+
             if self.colour == "w":
 
                 if self.rank == 2:
@@ -86,9 +112,6 @@ class Pawn(Piece):
 
                 elif self.rank > 2:
                     self.legal_moves = [(self.file, self.rank + 1)]
-
-                for legal_move in self.legal_moves:
-                    pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
             elif self.colour == "b":
 
@@ -99,9 +122,9 @@ class Pawn(Piece):
                 elif self.rank < 7:
                     self.legal_moves = [(self.file, self.rank - 1)]
 
-                for legal_move in self.legal_moves:
+        for legal_move in self.legal_moves:
 
-                    pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class Queen(Piece):
     def __init__(self, file, rank, colour):
@@ -123,30 +146,38 @@ class Queen(Piece):
 
             # To the Right
             for i in range(self.file + 1, 9):
-
+                if is_piece_on_ts_square(i, self.rank):
+                    break
                 self.legal_moves.append((i, self.rank))
 
             # To the Left
 
             for i in range(self.file - 1, 0, -1):
 
+                if is_piece_on_ts_square(i, self.rank):
+                    break
                 self.legal_moves.append((i, self.rank))
 
             # For Up
             for i in range(self.rank + 1, 9):
-
+                if is_piece_on_ts_square(self.file, i):
+                    break
                 self.legal_moves.append((self.file, i))
 
             # For Down
 
             for i in range(self.rank - 1 , 0, -1):
 
+                if is_piece_on_ts_square(self.file, i):
+                    break
+
                 self.legal_moves.append((self.file, i))
 
             # For Diagonal Moves To the Top right
 
             for i in range (1, 9):
-
+                if is_piece_on_ts_square(self.file + i, self.rank + i):
+                    break
                 if self.file + i < 9 and self.rank + i < 9:
 
                     self.legal_moves.append((self.file  + i, self.rank + i))
@@ -154,6 +185,9 @@ class Queen(Piece):
             # For the Diagonal Moves to the Top Left
             
             for i in range(1, 9):
+
+                if is_piece_on_ts_square(self.file - i, self.rank + i):
+                    break
 
                 if self.file - i > 0 and self.rank + i < 9:
 
@@ -163,12 +197,18 @@ class Queen(Piece):
 
             for i in range(1, 9):
 
+                if is_piece_on_ts_square(self.file - i, self.rank - i):
+                    break
+
                 if self.file - i > 0 and self.rank - i > 0:
 
                     self.legal_moves.append((self.file-i,self.rank - i))
 
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
+
+                if is_piece_on_ts_square(self.file + i, self.rank - i):
+                    break
 
                 if self.file + i < 9 and self.rank - i > 0:
 
@@ -180,6 +220,7 @@ class Queen(Piece):
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class Rook(Piece):
+
     def __init__(self, file, rank, colour):
 
         super().__init__(file, rank, colour)
@@ -198,26 +239,30 @@ class Rook(Piece):
 
             # To the Right
             for i in range(self.file + 1, 9):
-
+                if is_piece_on_ts_square(i, self.rank):
+                    break
                 self.legal_moves.append((i, self.rank))
 
             # To the Left
 
             for i in range(self.file - 1, 0, -1):
 
+                if is_piece_on_ts_square(i, self.rank):
+                    break
                 self.legal_moves.append((i, self.rank))
 
             # For Up
             for i in range(self.rank + 1, 9):
-
+                if is_piece_on_ts_square(self.file, i):
+                    break
                 self.legal_moves.append((self.file, i))
 
             # For Down
 
             for i in range(self.rank - 1 , 0, -1):
 
-                self.legal_moves.append((self.file, i))
-
+                if is_piece_on_ts_square(self.file, i):
+                    break
 
         
         for legal_move in self.legal_moves:
@@ -245,7 +290,8 @@ class Bishop(Piece):
             # For Diagonal Moves To the Top right
 
             for i in range (1, 9):
-
+                if is_piece_on_ts_square(self.file + i, self.rank + i):
+                    break
                 if self.file + i < 9 and self.rank + i < 9:
 
                     self.legal_moves.append((self.file  + i, self.rank + i))
@@ -253,6 +299,9 @@ class Bishop(Piece):
             # For the Diagonal Moves to the Top Left
             
             for i in range(1, 9):
+
+                if is_piece_on_ts_square(self.file - i, self.rank + i):
+                    break
 
                 if self.file - i > 0 and self.rank + i < 9:
 
@@ -262,6 +311,9 @@ class Bishop(Piece):
 
             for i in range(1, 9):
 
+                if is_piece_on_ts_square(self.file - i, self.rank - i):
+                    break
+
                 if self.file - i > 0 and self.rank - i > 0:
 
                     self.legal_moves.append((self.file-i,self.rank - i))
@@ -269,9 +321,12 @@ class Bishop(Piece):
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
 
-                if self.file + i < 9 and self.rank - i < 9:
-                    
-                    self.legal_moves.append((self.file + i,self.rank - i))
+                if is_piece_on_ts_square(self.file + i, self.rank - i):
+                    break
+
+                if self.file + i < 9 and self.rank - i > 0:
+
+                    self.legal_moves.append((self.file + i, self.rank - i))     
 
 
         for legal_move in self.legal_moves:
