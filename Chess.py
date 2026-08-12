@@ -63,13 +63,21 @@ def convert_into_file_rank(x, y):
     return ((x // unit) + 1, 8 - (y // unit))
 
 
-def which_colour_piece_on_ts_square(file, rank):
+def is_piece_on_square(file, rank):
 
-    if any(piece.file == file and piece.rank == rank for piece in board) and :
+    if any(piece.file == file and piece.rank == rank for piece in board):
 
         return True
     
     return False
+
+def get_piece_on_square(file, rank):
+
+    for piece in board:
+
+        if piece.file == file and piece.rank == rank:
+
+            return piece
 
 
 
@@ -81,6 +89,14 @@ class Piece:
         self.rank = rank
 
         self.colour = colour
+
+        self.pos_x, self.pos_y = convert_into_pos(self.file,self.rank)
+
+    def move(self, new_file, new_rank):
+
+        self.file = new_file
+
+        self.rank = new_rank
 
         self.pos_x, self.pos_y = convert_into_pos(self.file,self.rank)
  
@@ -104,7 +120,10 @@ class Pawn(Piece):
 
         if len(self.legal_moves) == 0:
 
-            if self.colour == "w":
+            # This part checks if the pawn can move forward one square or two squares (if it's on its starting rank)
+            # and if there are no pieces blocking its path
+
+            if self.colour == "w" and is_piece_on_square(self.file, self.rank + 1) == False:
 
                 if self.rank == 2:
 
@@ -113,7 +132,7 @@ class Pawn(Piece):
                 elif self.rank > 2:
                     self.legal_moves = [(self.file, self.rank + 1)]
 
-            elif self.colour == "b":
+            elif self.colour == "b" and is_piece_on_square(self.file, self.rank - 1) == False:
 
                 if self.rank == 7:
 
@@ -121,6 +140,28 @@ class Pawn(Piece):
 
                 elif self.rank < 7:
                     self.legal_moves = [(self.file, self.rank - 1)]
+
+
+            # This part checks if the pawn can capture an opponent's piece diagonally
+
+            if self.colour == "w":
+
+                if is_piece_on_square(self.file + 1, self.rank + 1) and get_piece_on_square(self.file + 1, self.rank + 1).colour == "b":
+
+                    self.legal_moves.append((self.file + 1, self.rank + 1))
+
+                if is_piece_on_square(self.file - 1, self.rank + 1) and get_piece_on_square(self.file - 1, self.rank + 1).colour == "b":
+
+                    self.legal_moves.append((self.file - 1, self.rank + 1))
+            elif self.colour == "b":
+
+                if is_piece_on_square(self.file + 1, self.rank - 1) and get_piece_on_square(self.file + 1, self.rank - 1).colour == "w":
+
+                    self.legal_moves.append((self.file + 1, self.rank - 1))
+
+                if is_piece_on_square(self.file - 1, self.rank - 1) and get_piece_on_square(self.file - 1, self.rank - 1).colour == "w":
+
+                    self.legal_moves.append((self.file - 1, self.rank - 1))
 
         for legal_move in self.legal_moves:
 
@@ -146,7 +187,7 @@ class Queen(Piece):
 
             # To the Right
             for i in range(self.file + 1, 9):
-                if which_colour_piece_on_ts_square(i, self.rank):
+                if is_piece_on_square(i, self.rank):
                     break
                 self.legal_moves.append((i, self.rank))
 
@@ -154,13 +195,13 @@ class Queen(Piece):
 
             for i in range(self.file - 1, 0, -1):
 
-                if which_colour_piece_on_ts_square(i, self.rank):
+                if is_piece_on_square(i, self.rank):
                     break
                 self.legal_moves.append((i, self.rank))
 
             # For Up
             for i in range(self.rank + 1, 9):
-                if which_colour_piece_on_ts_square(self.file, i):
+                if is_piece_on_square(self.file, i):
                     break
                 self.legal_moves.append((self.file, i))
 
@@ -168,7 +209,7 @@ class Queen(Piece):
 
             for i in range(self.rank - 1 , 0, -1):
 
-                if which_colour_piece_on_ts_square(self.file, i):
+                if is_piece_on_square(self.file, i):
                     break
 
                 self.legal_moves.append((self.file, i))
@@ -176,7 +217,7 @@ class Queen(Piece):
             # For Diagonal Moves To the Top right
 
             for i in range (1, 9):
-                if which_colour_piece_on_ts_square(self.file + i, self.rank + i):
+                if is_piece_on_square(self.file + i, self.rank + i):
                     break
                 if self.file + i < 9 and self.rank + i < 9:
 
@@ -186,7 +227,7 @@ class Queen(Piece):
             
             for i in range(1, 9):
 
-                if which_colour_piece_on_ts_square(self.file - i, self.rank + i):
+                if is_piece_on_square(self.file - i, self.rank + i):
                     break
 
                 if self.file - i > 0 and self.rank + i < 9:
@@ -197,7 +238,7 @@ class Queen(Piece):
 
             for i in range(1, 9):
 
-                if which_colour_piece_on_ts_square(self.file - i, self.rank - i):
+                if is_piece_on_square(self.file - i, self.rank - i):
                     break
 
                 if self.file - i > 0 and self.rank - i > 0:
@@ -207,7 +248,7 @@ class Queen(Piece):
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
 
-                if which_colour_piece_on_ts_square(self.file + i, self.rank - i):
+                if is_piece_on_square(self.file + i, self.rank - i):
                     break
 
                 if self.file + i < 9 and self.rank - i > 0:
@@ -239,7 +280,7 @@ class Rook(Piece):
 
             # To the Right
             for i in range(self.file + 1, 9):
-                if which_colour_piece_on_ts_square(i, self.rank):
+                if is_piece_on_square(i, self.rank):
                     break
                 self.legal_moves.append((i, self.rank))
 
@@ -247,13 +288,13 @@ class Rook(Piece):
 
             for i in range(self.file - 1, 0, -1):
 
-                if which_colour_piece_on_ts_square(i, self.rank):
+                if is_piece_on_square(i, self.rank):
                     break
                 self.legal_moves.append((i, self.rank))
 
             # For Up
             for i in range(self.rank + 1, 9):
-                if which_colour_piece_on_ts_square(self.file, i):
+                if is_piece_on_square(self.file, i):
                     break
                 self.legal_moves.append((self.file, i))
 
@@ -261,7 +302,7 @@ class Rook(Piece):
 
             for i in range(self.rank - 1 , 0, -1):
 
-                if which_colour_piece_on_ts_square(self.file, i):
+                if is_piece_on_square(self.file, i):
                     break
 
         
@@ -290,7 +331,7 @@ class Bishop(Piece):
             # For Diagonal Moves To the Top right
 
             for i in range (1, 9):
-                if which_colour_piece_on_ts_square(self.file + i, self.rank + i):
+                if is_piece_on_square(self.file + i, self.rank + i):
                     break
                 if self.file + i < 9 and self.rank + i < 9:
 
@@ -300,7 +341,7 @@ class Bishop(Piece):
             
             for i in range(1, 9):
 
-                if which_colour_piece_on_ts_square(self.file - i, self.rank + i):
+                if is_piece_on_square(self.file - i, self.rank + i):
                     break
 
                 if self.file - i > 0 and self.rank + i < 9:
@@ -311,7 +352,7 @@ class Bishop(Piece):
 
             for i in range(1, 9):
 
-                if which_colour_piece_on_ts_square(self.file - i, self.rank - i):
+                if is_piece_on_square(self.file - i, self.rank - i):
                     break
 
                 if self.file - i > 0 and self.rank - i > 0:
@@ -321,7 +362,7 @@ class Bishop(Piece):
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
 
-                if which_colour_piece_on_ts_square(self.file + i, self.rank - i):
+                if is_piece_on_square(self.file + i, self.rank - i):
                     break
 
                 if self.file + i < 9 and self.rank - i > 0:
@@ -351,29 +392,46 @@ class Knight(Piece):
     def see_legal_moves(self):
         
         if len(self.legal_moves) == 0:
+
             # Go 1 square to the right and 2 squares above
-            self.legal_moves.append((self.file + 1, self.rank + 2))
+            if self.file + 1 < 9 and self.rank + 2 < 9:
+                if not is_piece_on_square(self.file + 1, self.rank + 2):
+                    self.legal_moves.append((self.file + 1, self.rank + 2))
 
             # Go 1 square to the left and 2 squares above
-            self.legal_moves.append((self.file - 1, self.rank + 2))
+            if self.file - 1 > 0 and self.rank + 2 < 9:
+                if not is_piece_on_square(self.file - 1, self.rank + 2):
+                    self.legal_moves.append((self.file - 1, self.rank + 2))
 
             # Go 2 squares to the right and 1 square above
-            self.legal_moves.append((self.file + 2, self.rank + 1))
+            if self.file + 2 < 9 and self.rank + 1 < 9:
+                if not is_piece_on_square(self.file + 2, self.rank + 1):
+                    self.legal_moves.append((self.file + 2, self.rank + 1))
 
             # Go 2 squares to the left and 1 square above
-            self.legal_moves.append((self.file - 2, self.rank + 1))
+            if self.file - 2 > 0 and self.rank + 1 < 9:
+                if not is_piece_on_square(self.file - 2, self.rank + 1):
+                    self.legal_moves.append((self.file - 2, self.rank + 1))
 
             # Go 2 squares to the right and 1 square below
-            self.legal_moves.append((self.file + 2, self.rank - 1))
+            if self.file + 2 < 9 and self.rank - 1 > 0:
+                if not is_piece_on_square(self.file + 2, self.rank - 1):
+                    self.legal_moves.append((self.file + 2, self.rank - 1))
 
             # Go 2 squares to the left and 1 square below
-            self.legal_moves.append((self.file - 2, self.rank - 1))
+            if self.file - 2 > 0 and self.rank - 1 > 0:
+                if not is_piece_on_square(self.file - 2, self.rank - 1):
+                    self.legal_moves.append((self.file - 2, self.rank - 1))
 
             # Go 1 squares to the right and 2 squares below
-            self.legal_moves.append((self.file + 1, self.rank - 2))
+            if self.file + 1 < 9 and self.rank - 2 > 0:
+                if not is_piece_on_square(self.file + 1, self.rank - 2):
+                    self.legal_moves.append((self.file + 1, self.rank - 2))
 
             # Go 1 squares to the left and 2 squares below
-            self.legal_moves.append((self.file - 1, self.rank - 2))
+            if self.file - 1 > 0 and self.rank - 2 > 0:
+                if not is_piece_on_square(self.file - 1, self.rank - 2):
+                    self.legal_moves.append((self.file - 1, self.rank - 2))
 
         for legal_move in self.legal_moves:
             
@@ -398,21 +456,34 @@ class King(Piece):
 
         if len(self.legal_moves) == 0:
 
-            self.legal_moves.append((self.file + 1, self.rank + 1))
+            if self.file + 1 < 9 and self.rank + 1 < 9:
+                if not is_piece_on_square(self.file + 1, self.rank + 1):
+                    self.legal_moves.append((self.file + 1, self.rank + 1))
 
-            self.legal_moves.append((self.file + 1, self.rank - 1))
+            if self.file + 1 < 9 and self.rank - 1 > 0:
+                if not is_piece_on_square(self.file + 1, self.rank - 1):
+                    self.legal_moves.append((self.file + 1, self.rank - 1))
 
-            self.legal_moves.append((self.file + 1, self.rank))
+            if self.file + 1 < 9:
+                if not is_piece_on_square(self.file + 1, self.rank):
+                    self.legal_moves.append((self.file + 1, self.rank))
 
-            self.legal_moves.append((self.file - 1, self.rank + 1))
+            if self.file - 1 > 0 and self.rank + 1 < 9:
+                if not is_piece_on_square(self.file - 1, self.rank + 1):
+                    self.legal_moves.append((self.file - 1, self.rank + 1))
 
-            self.legal_moves.append((self.file - 1, self.rank - 1))
+            if self.file - 1 > 0 and self.rank - 1 > 0:
+                if not is_piece_on_square(self.file - 1, self.rank - 1):
+                    self.legal_moves.append((self.file - 1, self.rank - 1))
 
-            self.legal_moves.append((self.file - 1, self.rank))
+            if self.file - 1 > 0:
+                if not is_piece_on_square(self.file - 1, self.rank):
 
-            self.legal_moves.append((self.file, self.rank + 1))
+                    self.legal_moves.append((self.file, self.rank + 1))
 
-            self.legal_moves.append((self.file, self.rank - 1))
+            if self.file + 1 < 9 and self.rank - 1 > 0:
+                if not is_piece_on_square(self.file + 1, self.rank - 1):
+                    self.legal_moves.append((self.file + 1, self.rank - 1))
 
         for legal_move in self.legal_moves:
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
@@ -435,6 +506,9 @@ class ChessGame:
         self.selected_piece = None
 
     def check_where_clicked(self, event):
+
+            self.selected_piece = None
+            
             click_square = convert_into_file_rank(*event.pos)
 
             for piece in board:
@@ -442,6 +516,9 @@ class ChessGame:
                 if (piece.file, piece.rank) == click_square:
 
                     self.selected_piece = piece
+                if piece == board[-1] and self.selected_piece is None:
+
+                    print("No piece on that square")
 
 
     def draw_piece(self, piece, file, rank):
