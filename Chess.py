@@ -63,9 +63,9 @@ def convert_into_file_rank(x, y):
     return ((x // unit) + 1, 8 - (y // unit))
 
 
-def is_piece_on_ts_square(file, rank):
+def which_colour_piece_on_ts_square(file, rank):
 
-    if any(piece.file == file and piece.rank == rank for piece in board):
+    if any(piece.file == file and piece.rank == rank for piece in board) and :
 
         return True
     
@@ -146,7 +146,7 @@ class Queen(Piece):
 
             # To the Right
             for i in range(self.file + 1, 9):
-                if is_piece_on_ts_square(i, self.rank):
+                if which_colour_piece_on_ts_square(i, self.rank):
                     break
                 self.legal_moves.append((i, self.rank))
 
@@ -154,13 +154,13 @@ class Queen(Piece):
 
             for i in range(self.file - 1, 0, -1):
 
-                if is_piece_on_ts_square(i, self.rank):
+                if which_colour_piece_on_ts_square(i, self.rank):
                     break
                 self.legal_moves.append((i, self.rank))
 
             # For Up
             for i in range(self.rank + 1, 9):
-                if is_piece_on_ts_square(self.file, i):
+                if which_colour_piece_on_ts_square(self.file, i):
                     break
                 self.legal_moves.append((self.file, i))
 
@@ -168,7 +168,7 @@ class Queen(Piece):
 
             for i in range(self.rank - 1 , 0, -1):
 
-                if is_piece_on_ts_square(self.file, i):
+                if which_colour_piece_on_ts_square(self.file, i):
                     break
 
                 self.legal_moves.append((self.file, i))
@@ -176,7 +176,7 @@ class Queen(Piece):
             # For Diagonal Moves To the Top right
 
             for i in range (1, 9):
-                if is_piece_on_ts_square(self.file + i, self.rank + i):
+                if which_colour_piece_on_ts_square(self.file + i, self.rank + i):
                     break
                 if self.file + i < 9 and self.rank + i < 9:
 
@@ -186,7 +186,7 @@ class Queen(Piece):
             
             for i in range(1, 9):
 
-                if is_piece_on_ts_square(self.file - i, self.rank + i):
+                if which_colour_piece_on_ts_square(self.file - i, self.rank + i):
                     break
 
                 if self.file - i > 0 and self.rank + i < 9:
@@ -197,7 +197,7 @@ class Queen(Piece):
 
             for i in range(1, 9):
 
-                if is_piece_on_ts_square(self.file - i, self.rank - i):
+                if which_colour_piece_on_ts_square(self.file - i, self.rank - i):
                     break
 
                 if self.file - i > 0 and self.rank - i > 0:
@@ -207,7 +207,7 @@ class Queen(Piece):
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
 
-                if is_piece_on_ts_square(self.file + i, self.rank - i):
+                if which_colour_piece_on_ts_square(self.file + i, self.rank - i):
                     break
 
                 if self.file + i < 9 and self.rank - i > 0:
@@ -239,7 +239,7 @@ class Rook(Piece):
 
             # To the Right
             for i in range(self.file + 1, 9):
-                if is_piece_on_ts_square(i, self.rank):
+                if which_colour_piece_on_ts_square(i, self.rank):
                     break
                 self.legal_moves.append((i, self.rank))
 
@@ -247,13 +247,13 @@ class Rook(Piece):
 
             for i in range(self.file - 1, 0, -1):
 
-                if is_piece_on_ts_square(i, self.rank):
+                if which_colour_piece_on_ts_square(i, self.rank):
                     break
                 self.legal_moves.append((i, self.rank))
 
             # For Up
             for i in range(self.rank + 1, 9):
-                if is_piece_on_ts_square(self.file, i):
+                if which_colour_piece_on_ts_square(self.file, i):
                     break
                 self.legal_moves.append((self.file, i))
 
@@ -261,7 +261,7 @@ class Rook(Piece):
 
             for i in range(self.rank - 1 , 0, -1):
 
-                if is_piece_on_ts_square(self.file, i):
+                if which_colour_piece_on_ts_square(self.file, i):
                     break
 
         
@@ -290,7 +290,7 @@ class Bishop(Piece):
             # For Diagonal Moves To the Top right
 
             for i in range (1, 9):
-                if is_piece_on_ts_square(self.file + i, self.rank + i):
+                if which_colour_piece_on_ts_square(self.file + i, self.rank + i):
                     break
                 if self.file + i < 9 and self.rank + i < 9:
 
@@ -300,7 +300,7 @@ class Bishop(Piece):
             
             for i in range(1, 9):
 
-                if is_piece_on_ts_square(self.file - i, self.rank + i):
+                if which_colour_piece_on_ts_square(self.file - i, self.rank + i):
                     break
 
                 if self.file - i > 0 and self.rank + i < 9:
@@ -311,7 +311,7 @@ class Bishop(Piece):
 
             for i in range(1, 9):
 
-                if is_piece_on_ts_square(self.file - i, self.rank - i):
+                if which_colour_piece_on_ts_square(self.file - i, self.rank - i):
                     break
 
                 if self.file - i > 0 and self.rank - i > 0:
@@ -321,7 +321,7 @@ class Bishop(Piece):
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
 
-                if is_piece_on_ts_square(self.file + i, self.rank - i):
+                if which_colour_piece_on_ts_square(self.file + i, self.rank - i):
                     break
 
                 if self.file + i < 9 and self.rank - i > 0:
