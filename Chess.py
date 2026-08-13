@@ -604,8 +604,9 @@ class King(Piece):
                     self.legal_moves.append((self.file + 1, self.rank - 1))
 
             if self.file + 1 < 9:
+                
                 if is_piece_on_square(self.file + 1, self.rank):
-                    print("activated")
+
                     if not self.colour == get_piece_on_square(self.file + 1, self.rank).colour:
 
                        self.legal_moves.append((self.file + 1, self.rank))
@@ -641,7 +642,9 @@ class King(Piece):
                     if not self.colour == get_piece_on_square(self.file - 1, self.rank).colour:
 
                         self.legal_moves.append((self.file - 1, self.rank))
+
                 else:
+
                     self.legal_moves.append((self.file - 1, self.rank))
 
             if self.file + 1 < 9 and self.rank - 1 > 0:
@@ -653,7 +656,7 @@ class King(Piece):
                         self.legal_moves.append((self.file + 1, self.rank - 1))
                 else:
                     self.legal_moves.append((self.file + 1, self.rank - 1))
-            print(self.legal_moves)
+
         for legal_move in self.legal_moves:
 
             pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
