@@ -18,6 +18,8 @@ light = (118, 150, 86)
 
 green = (0, 255, 0)
 
+yellow = (255, 255, 0)
+
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 turn = "w"
@@ -98,7 +100,7 @@ class Piece:
 
 
         if is_piece_on_square(new_file, new_rank):
-            
+            print("it's supposed tocapture")
             piece_to_remove = get_piece_on_square(new_file, new_rank)
 
             board.remove(piece_to_remove)
@@ -146,6 +148,8 @@ class Pawn(Piece):
                     if is_piece_on_square(self.file, self.rank + 2) == False:
 
                         self.legal_moves = [(self.file, self.rank + 1), (self.file, self.rank + 2)]
+                    else:
+                        self.legal_moves = [(self.file, self.rank + 1)]
 
                 elif self.rank > 2:
 
@@ -155,7 +159,11 @@ class Pawn(Piece):
 
                 if self.rank == 7:
 
-                    self.legal_moves = [(self.file, self.rank - 1), (self.file, self.rank - 2)]
+                    if is_piece_on_square(self.file, self.rank - 2) == False:
+
+                        self.legal_moves = [(self.file, self.rank - 1), (self.file, self.rank - 2)]
+                    else:
+                        self.legal_moves = [(self.file, self.rank - 1)]
 
                 elif self.rank < 7:
                     self.legal_moves = [(self.file, self.rank - 1)]
@@ -206,66 +214,78 @@ class Queen(Piece):
 
             # To the Right
             for i in range(self.file + 1, 9):
+                if self.file + 1 < 9 and self.rank + 1 < 9:
+                    if is_piece_on_square(i, self.rank):
 
-                if is_piece_on_square(i, self.rank):
+                        if get_piece_on_square(i, self.rank).colour != self.colour:
 
-                    if get_piece_on_square(i, self.rank).colour != self.colour:
-
+                            self.legal_moves.append((i, self.rank, "capture"))
+                        break
+                    else:
                         self.legal_moves.append((i, self.rank))
-                    break
-                self.legal_moves.append((i, self.rank))
 
             # To the Left
 
             for i in range(self.file - 1, 0, -1):
 
-                if is_piece_on_square(i, self.rank):
+                if self.file - 1 > 0 and self.rank - 1 > 0:
 
-                    if get_piece_on_square(i, self.rank).colour != self.colour:
+                    if is_piece_on_square(i, self.rank):   
 
+                        if get_piece_on_square(i, self.rank).colour != self.colour:
+
+                            self.legal_moves.append((i, self.rank, "capture"))
+                        break
+                    else:
                         self.legal_moves.append((i, self.rank))
-                    break
-                self.legal_moves.append((i, self.rank))
 
             # For Up
             for i in range(self.rank + 1, 9):
 
-                if is_piece_on_square(self.file, i):
+                if self.file + 1 < 9 and self.rank + 1 < 9:
 
-                    if get_piece_on_square(self.file, i).colour != self.colour:
+                    if is_piece_on_square(self.file, i):
 
+                        if get_piece_on_square(self.file, i).colour != self.colour:
+
+                            self.legal_moves.append((self.file, i, "capture"))
+
+                        break
+                    else:
                         self.legal_moves.append((self.file, i))
-
-                    break
-                self.legal_moves.append((self.file, i))
 
             # For Down
 
             for i in range(self.rank - 1 , 0, -1):
 
-                if is_piece_on_square(self.file, i):
+                if self.file + 1 < 9 and self.rank - 1 > 0:
 
-                    if get_piece_on_square(self.file, i).colour != self.colour:
+                    if is_piece_on_square(self.file, i):
 
+                        if get_piece_on_square(self.file, i).colour != self.colour:
+
+                            self.legal_moves.append((self.file, i, "capture"))
+
+                        break
+                    else:
                         self.legal_moves.append((self.file, i))
-
-                    break
-
-                self.legal_moves.append((self.file, i))
 
             # For Diagonal Moves To the Top right
 
             for i in range (1, 9):
 
-                if is_piece_on_square(self.file + i, self.rank + i):
-
-                    if get_piece_on_square(self.file + i, self.rank + i).colour != self.colour:
-                    
-                        self.legal_moves.append((self.file + i, self.rank + i))
-                    break
                 if self.file + i < 9 and self.rank + i < 9:
 
-                    self.legal_moves.append((self.file  + i, self.rank + i))
+                    if is_piece_on_square(self.file + i, self.rank + i):
+
+                        if get_piece_on_square(self.file + i, self.rank + i).colour != self.colour:
+                        
+                            self.legal_moves.append((self.file + i, self.rank + i, "capture"))
+                        break
+            
+                    else:
+
+                        self.legal_moves.append((self.file  + i, self.rank + i))
 
             # For the Diagonal Moves to the Top Left
             
@@ -275,7 +295,7 @@ class Queen(Piece):
 
                     if get_piece_on_square(self.file - i, self.rank + i).colour != self.colour:
 
-                        self.legal_moves.append((self.file - i, self.rank + i))
+                        self.legal_moves.append((self.file - i, self.rank + i, "capture"))
 
                     break
 
@@ -291,7 +311,7 @@ class Queen(Piece):
 
                     if get_piece_on_square(self.file - i, self.rank - i).colour != self.colour:
 
-                        self.legal_moves.append((self.file - i, self.rank - i))
+                        self.legal_moves.append((self.file - i, self.rank - i, "capture"))
                     break
 
                 if self.file - i > 0 and self.rank - i > 0:
@@ -301,16 +321,18 @@ class Queen(Piece):
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
 
-                if is_piece_on_square(self.file + i, self.rank - i):
-
-                    if get_piece_on_square(self.file + i, self.rank - i).colour != self.colour:
-
-                        self.legal_moves.append((self.file + i, self.rank - i))
-                    break
-
                 if self.file + i < 9 and self.rank - i > 0:
 
-                    self.legal_moves.append((self.file + i, self.rank - i))     
+                    if is_piece_on_square(self.file + i, self.rank - i):
+
+                        if get_piece_on_square(self.file + i, self.rank - i).colour != self.colour:
+
+                            self.legal_moves.append((self.file + i, self.rank - i, "capture"))
+                        break
+
+
+                    else:
+                        self.legal_moves.append((self.file + i, self.rank - i))     
 
 
         for legal_move in self.legal_moves:
@@ -342,9 +364,11 @@ class Rook(Piece):
 
                     if get_piece_on_square(i, self.rank).colour != self.colour:
 
-                        self.legal_moves.append((i, self.rank))
+                        self.legal_moves.append((i, self.rank, "capture"))
                     break
-                self.legal_moves.append((i, self.rank))
+
+                else:
+                    self.legal_moves.append((i, self.rank))
 
             # To the Left
 
@@ -354,9 +378,10 @@ class Rook(Piece):
 
                     if get_piece_on_square(i, self.rank).colour != self.colour:
 
-                        self.legal_moves.append((i, self.rank))
+                        self.legal_moves.append((i, self.rank, "capture"))
                     break
-                self.legal_moves.append((i, self.rank))
+                else:
+                    self.legal_moves.append((i, self.rank))
 
             # For Up
             for i in range(self.rank + 1, 9):
@@ -365,10 +390,11 @@ class Rook(Piece):
 
                     if get_piece_on_square(self.file, i).colour != self.colour:
 
-                        self.legal_moves.append((self.file, i))
+                        self.legal_moves.append((self.file, i, "capture"))
 
                     break
-                self.legal_moves.append((self.file, i))
+                else:
+                    self.legal_moves.append((self.file, i))
 
             # For Down
 
@@ -378,12 +404,11 @@ class Rook(Piece):
 
                     if get_piece_on_square(self.file, i).colour != self.colour:
 
-                        self.legal_moves.append((self.file, i))
+                        self.legal_moves.append((self.file, i, "capture"))
 
                     break
-
-                self.legal_moves.append((self.file, i))
-                
+                else:
+                    self.legal_moves.append((self.file, i))
         
         for legal_move in self.legal_moves:
 
@@ -411,46 +436,53 @@ class Bishop(Piece):
 
             for i in range (1, 9):
 
-                if is_piece_on_square(self.file + i, self.rank + i):
-
-                    if get_piece_on_square(self.file + i, self.rank + i).colour != self.colour:
-                    
-                        self.legal_moves.append((self.file + i, self.rank + i))
-                    break
                 if self.file + i < 9 and self.rank + i < 9:
 
-                    self.legal_moves.append((self.file  + i, self.rank + i))
+                    if is_piece_on_square(self.file + i, self.rank + i):
+
+                        if get_piece_on_square(self.file + i, self.rank + i).colour != self.colour:
+                        
+                            self.legal_moves.append((self.file + i, self.rank + i, "capture"))
+                        break
+
+                    else:
+                        self.legal_moves.append((self.file  + i, self.rank + i))
 
             # For the Diagonal Moves to the Top Left
             
             for i in range(1, 9):
 
-                if is_piece_on_square(self.file - i, self.rank + i):
-
-                    if get_piece_on_square(self.file - i, self.rank + i).colour != self.colour:
-
-                        self.legal_moves.append((self.file - i, self.rank + i))
-
-                    break
-
                 if self.file - i > 0 and self.rank + i < 9:
 
-                    self.legal_moves.append((self.file - i, self.rank + i))
+                    if is_piece_on_square(self.file - i, self.rank + i):
+
+                        if get_piece_on_square(self.file - i, self.rank + i).colour != self.colour:
+
+                            self.legal_moves.append((self.file - i, self.rank + i, "capture"))
+
+                        break
+
+
+                    else:
+
+                        self.legal_moves.append((self.file - i, self.rank + i))
 
             # For Diagonal Moves to the bottom left
 
             for i in range(1, 9):
-
-                if is_piece_on_square(self.file - i, self.rank - i):
-
-                    if get_piece_on_square(self.file - i, self.rank - i).colour != self.colour:
-
-                        self.legal_moves.append((self.file - i, self.rank - i))
-                    break
-
+                
                 if self.file - i > 0 and self.rank - i > 0:
 
-                    self.legal_moves.append((self.file-i,self.rank - i))
+                    if is_piece_on_square(self.file - i, self.rank - i):
+
+                        if get_piece_on_square(self.file - i, self.rank - i).colour != self.colour:
+
+                            self.legal_moves.append((self.file - i, self.rank - i, "capture"))
+
+                        break
+
+                    else:
+                        self.legal_moves.append((self.file-i,self.rank - i))
 
             # For Diagonal Moves to the bottom right
             for i in range(1,9):
@@ -459,7 +491,7 @@ class Bishop(Piece):
 
                     if get_piece_on_square(self.file + i, self.rank - i).colour != self.colour:
 
-                        self.legal_moves.append((self.file + i, self.rank - i))
+                        self.legal_moves.append((self.file + i, self.rank - i, "capture"))
                     break
 
                 if self.file + i < 9 and self.rank - i > 0:
@@ -496,7 +528,7 @@ class Knight(Piece):
 
                     if not self.colour == get_piece_on_square(self.file + 1, self.rank + 2).colour:
 
-                        self.legal_moves.append((self.file + 1, self.rank + 2)) 
+                        self.legal_moves.append((self.file + 1, self.rank + 2, "capture")) 
                 else:
 
                     self.legal_moves.append((self.file + 1, self.rank + 2))
@@ -508,7 +540,7 @@ class Knight(Piece):
 
                     if not self.colour == get_piece_on_square(self.file - 1, self.rank + 2).colour:
 
-                        self.legal_moves.append((self.file - 1, self.rank + 2))
+                        self.legal_moves.append((self.file - 1, self.rank + 2, "capture"))
 
                 else:
                     self.legal_moves.append((self.file - 1, self.rank + 2))
@@ -520,7 +552,7 @@ class Knight(Piece):
 
                     if not self.colour == get_piece_on_square(self.file + 2, self.rank + 1).colour:
 
-                        self.legal_moves.append((self.file + 2, self.rank + 1))
+                        self.legal_moves.append((self.file + 2, self.rank + 1, "capture"))
 
                 else:
 
@@ -534,9 +566,9 @@ class Knight(Piece):
 
                     if not self.colour == get_piece_on_square(self.file - 2, self.rank + 1).colour:
 
-                        self.legal_moves.append((self.file - 2, self.rank + 1))
+                        self.legal_moves.append((self.file - 2, self.rank + 1, "capture"))
                 else:
-                    self.legal_moves.append((self.file - 2, self.rank + 1))
+                    self.legal_moves.append((self.file - 2, self.rank + 1, ))
 
             # Go 2 squares to the right and 1 square below
             if self.file + 2 < 9 and self.rank - 1 > 0:
@@ -545,7 +577,7 @@ class Knight(Piece):
 
                     if not self.colour == get_piece_on_square(self.file + 2, self.rank - 1).colour:
 
-                        self.legal_moves.append((self.file + 2, self.rank - 1))
+                        self.legal_moves.append((self.file + 2, self.rank - 1, "capture"))
 
                 else:
 
@@ -558,7 +590,7 @@ class Knight(Piece):
 
                     if not self.colour == get_piece_on_square(self.file - 2, self.rank - 1).colour:
 
-                        self.legal_moves.append((self.file - 2, self.rank - 1))
+                        self.legal_moves.append((self.file - 2, self.rank - 1, "capture"))
                 else:
 
                     self.legal_moves.append((self.file - 2, self.rank - 1))
@@ -571,28 +603,29 @@ class Knight(Piece):
 
                     if not self.colour == get_piece_on_square(self.file + 1, self.rank - 2).colour:
 
-                        self.legal_moves.append((self.file + 1, self.rank - 2))
+                        self.legal_moves.append((self.file + 1, self.rank - 2, "capture"))
                 else:
 
                     self.legal_moves.append((self.file + 1, self.rank - 2))
 
 
             # Go 1 squares to the left and 2 squares below
-            print(self.file - 1, self.rank - 2)
             if self.file - 1 > 0 and self.rank - 2 > 0:
 
-                print("activated")
                 if is_piece_on_square(self.file - 1, self.rank - 2):
 
                     if not self.colour == get_piece_on_square(self.file - 1, self.rank - 2).colour:
 
-                        self.legal_moves.append((self.file - 1, self.rank - 2))
+                        self.legal_moves.append((self.file - 1, self.rank - 2, "capture"))
                 else:
                     self.legal_moves.append((self.file - 1, self.rank - 2))
 
-        for legal_move in self.legal_moves:
 
-            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+        for legal_move in self.legal_moves:
+            if "capture" in legal_move:
+                pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
+            else:
+                pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class King(Piece):
 
@@ -619,7 +652,7 @@ class King(Piece):
 
                     if not self.colour == get_piece_on_square(self.file + 1, self.rank + 1).colour:
 
-                        self.legal_moves.append((self.file + 1, self.rank + 1))
+                        self.legal_moves.append((self.file + 1, self.rank + 1, "capture"))
 
                 else:
                     self.legal_moves.append((self.file + 1, self.rank + 1))
@@ -630,7 +663,7 @@ class King(Piece):
 
                     if not self.colour == get_piece_on_square(self.file + 1, self.rank - 1).colour:
 
-                        self.legal_moves.append((self.file + 1, self.rank - 1))
+                        self.legal_moves.append((self.file + 1, self.rank - 1, "capture"))
 
                 else:
                     self.legal_moves.append((self.file + 1, self.rank - 1))
@@ -641,7 +674,7 @@ class King(Piece):
 
                     if not self.colour == get_piece_on_square(self.file + 1, self.rank).colour:
 
-                       self.legal_moves.append((self.file + 1, self.rank))
+                       self.legal_moves.append((self.file + 1, self.rank, "capture"))
 
                 else:
                     self.legal_moves.append((self.file + 1, self.rank))
@@ -654,7 +687,7 @@ class King(Piece):
 
                     if not self.colour == get_piece_on_square(self.file - 1, self.rank + 1).colour:
 
-                        self.legal_moves.append((self.file - 1, self.rank + 1))
+                        self.legal_moves.append((self.file - 1, self.rank + 1, "capture"))
 
                 else:
                     self.legal_moves.append((self.file - 1, self.rank + 1))
@@ -666,7 +699,7 @@ class King(Piece):
 
                     if not self.colour == get_piece_on_square(self.file - 1, self.rank - 1).colour:
 
-                        self.legal_moves.append((self.file - 1, self.rank - 1))
+                        self.legal_moves.append((self.file - 1, self.rank - 1, "capture"))
                 else:
                     self.legal_moves.append((self.file - 1, self.rank - 1))
             # To the Left
@@ -676,7 +709,7 @@ class King(Piece):
 
                     if not self.colour == get_piece_on_square(self.file - 1, self.rank).colour:
 
-                        self.legal_moves.append((self.file - 1, self.rank))
+                        self.legal_moves.append((self.file - 1, self.rank, "capture"))
 
                 else:
 
@@ -689,7 +722,7 @@ class King(Piece):
 
                     if not self.colour == get_piece_on_square(self.file, self.rank - 1).colour:
 
-                        self.legal_moves.append((self.file, self.rank - 1))
+                        self.legal_moves.append((self.file, self.rank - 1, "capture"))
                 else:
                     self.legal_moves.append((self.file, self.rank - 1))
 
@@ -700,15 +733,19 @@ class King(Piece):
 
                     if not self.colour == get_piece_on_square(self.file, self.rank + 1).colour:
 
-                        self.legal_moves.append((self.file, self.rank + 1))
+                        self.legal_moves.append((self.file, self.rank + 1, "capture"))
                 else:
                     self.legal_moves.append((self.file, self.rank + 1))
 
         for legal_move in self.legal_moves:
 
-            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+            if "capture" in legal_move:
 
+                pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
 
+            else:
+
+                pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 
 board = [(Rook(1, 1, "w")), (Knight(2, 1, "w")), (Bishop(3, 1, "w")), (Queen(4, 1, "w")), (King(5, 1, "w")), (Bishop(6, 1, "w")), (Knight(7, 1, "w")), (Rook(8, 1, "w")),
