@@ -24,6 +24,8 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 
 turn = "w"
 
+check = None
+
 pygame.display.set_caption("Chess")
 
 os = system()
@@ -80,6 +82,32 @@ def get_piece_on_square(file, rank):
 
             return piece
 
+def is_check(colour_of_moved_piece):
+    
+    checked = False
+
+    for piece in board:
+
+        if piece.type == "king" and piece.colour == colour_of_moved_piece:
+
+            king = piece
+
+            break
+
+    for piece in board:
+
+        if piece.colour != colour_of_moved_piece:
+
+            piece.see_legal_moves()
+
+            for legal_move in piece.legal_moves:
+
+                if (king.file, king.rank) == (legal_move[0], legal_move[1]):
+
+                    return True
+
+    return False
+
 
 
 class Piece:
@@ -93,14 +121,14 @@ class Piece:
 
         self.pos_x, self.pos_y = convert_into_pos(self.file,self.rank)
 
+        self.legal_moves = []
+
     def move(self, new_file, new_rank):
 
         global turn
 
-
-
         if is_piece_on_square(new_file, new_rank):
-            print("it's supposed tocapture")
+
             piece_to_remove = get_piece_on_square(new_file, new_rank)
 
             board.remove(piece_to_remove)
@@ -108,6 +136,8 @@ class Piece:
         self.file = new_file
 
         self.rank = new_rank
+
+        
 
         self.pos_x, self.pos_y = convert_into_pos(self.file,self.rank)
 
@@ -117,12 +147,25 @@ class Piece:
         else:
             
             turn = "w"
+    def see_legal_moves(self):
+
+        for legal_move in self.legal_moves:
+
+            if "capture" in legal_move:
+
+                pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
+
+            else:
+
+                pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class Pawn(Piece):
 
     def __init__(self, file, rank, colour):
 
         super().__init__(file, rank, colour)
+
+        self.type = "pawn"
 
         if colour == "w":
 
@@ -134,7 +177,7 @@ class Pawn(Piece):
 
         self.legal_moves = []
 
-    def see_legal_moves(self):
+    def calculate_legal_moves(self):
 
         if len(self.legal_moves) == 0:
             
@@ -175,29 +218,27 @@ class Pawn(Piece):
 
                 if is_piece_on_square(self.file + 1, self.rank + 1) and get_piece_on_square(self.file + 1, self.rank + 1).colour == "b":
 
-                    self.legal_moves.append((self.file + 1, self.rank + 1))
+                    self.legal_moves.append((self.file + 1, self.rank + 1, "capture"))
 
                 if is_piece_on_square(self.file - 1, self.rank + 1) and get_piece_on_square(self.file - 1, self.rank + 1).colour == "b":
 
-                    self.legal_moves.append((self.file - 1, self.rank + 1))
+                    self.legal_moves.append((self.file - 1, self.rank + 1, "capture"))
             elif self.colour == "b":
 
                 if is_piece_on_square(self.file + 1, self.rank - 1) and get_piece_on_square(self.file + 1, self.rank - 1).colour == "w":
 
-                    self.legal_moves.append((self.file + 1, self.rank - 1))
+                    self.legal_moves.append((self.file + 1, self.rank - 1, "capture"))
 
                 if is_piece_on_square(self.file - 1, self.rank - 1) and get_piece_on_square(self.file - 1, self.rank - 1).colour == "w":
 
-                    self.legal_moves.append((self.file - 1, self.rank - 1))
-
-        for legal_move in self.legal_moves:
-
-            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+                    self.legal_moves.append((self.file - 1, self.rank - 1, "capture"))
 
 class Queen(Piece):
     def __init__(self, file, rank, colour):
 
         super().__init__(file, rank, colour)
+
+        self.type = "queen"
 
         if colour == "w":
 
@@ -209,7 +250,7 @@ class Queen(Piece):
 
         self.legal_moves = []
 
-    def see_legal_moves(self):
+    def calculate_legal_moves(self):
         if len(self.legal_moves) == 0:
 
             # To the Right
@@ -334,16 +375,13 @@ class Queen(Piece):
                     else:
                         self.legal_moves.append((self.file + i, self.rank - i))     
 
-
-        for legal_move in self.legal_moves:
-
-            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
-
 class Rook(Piece):
 
     def __init__(self, file, rank, colour):
 
         super().__init__(file, rank, colour)
+
+        self.type = "rook"
 
         if colour == "w":
 
@@ -410,15 +448,14 @@ class Rook(Piece):
                 else:
                     self.legal_moves.append((self.file, i))
         
-        for legal_move in self.legal_moves:
-
-            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class Bishop(Piece):
 
     def __init__(self, file, rank, colour):
 
         super().__init__(file, rank, colour)
+
+        self.type = "bishop"
 
         if colour == "w":
 
@@ -500,7 +537,13 @@ class Bishop(Piece):
 
         for legal_move in self.legal_moves:
 
-            pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10) 
+            if "capture" in legal_move:
+
+                pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
+
+            else:
+
+                pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class Knight(Piece):
     def __init__(self, file, rank, colour):
@@ -514,6 +557,8 @@ class Knight(Piece):
             self.symbol = "n"
 
         super().__init__(file, rank, colour)
+
+        self.type = "knight"
 
         self.legal_moves = []
 
@@ -632,6 +677,8 @@ class King(Piece):
     def __init__(self, file, rank, colour):
 
         super().__init__(file, rank, colour)
+
+        self.type = "king"
 
         if colour == "w":
 
@@ -763,35 +810,35 @@ class ChessGame:
         self.selected_piece = None
 
     def check_where_clicked(self, event):
-            changed = False
-            click_square = convert_into_file_rank(*event.pos)
+        changed = False
+        click_square = convert_into_file_rank(*event.pos)
 
-            for piece in board:
+        for piece in board:
 
-                if (piece.file, piece.rank) == click_square and piece.colour == turn:
+            if (piece.file, piece.rank)== click_square and piece.colour == turn:
 
-                    if not self.selected_piece == piece:
-                        changed = True
+                if not self.selected_piece == piece:
+                    changed = True
 
-                    self.selected_piece = piece
-                if piece == board[-1] and not changed:
+                self.selected_piece = piece
+            if piece == board[-1] and not changed:
                     # This if block check if the selected piece has legal moves on the selected
                     # square and if it does, it moves the piece to that square
 
 
-                    if self.selected_piece is not None:
+                if self.selected_piece is not None:
                             
-                            if click_square in self.selected_piece.legal_moves:
+                        if (click_square in self.selected_piece.legal_moves) or ((*click_square, "capture") in self.selected_piece.legal_moves):
                     
-                                self.selected_piece.move(*click_square)
+                            self.selected_piece.move(*click_square)
                     
-                                self.selected_piece.legal_moves = []
+                            self.selected_piece.legal_moves = []
                     
-                                self.selected_piece = None
+                            self.selected_piece = None
 
-                    # If the clicked square is literally empty, it deselects the selected piece
+                # If the clicked square is literally empty, it deselects the selected piece
 
-                    self.selected_piece = None
+                self.selected_piece = None
 
 
     def draw_piece(self, piece, file, rank):
