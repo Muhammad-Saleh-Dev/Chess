@@ -44,6 +44,8 @@ PIECE_SYMBOLS = {
 }
 
 
+all_legal_moves = None
+
 def convert_into_pos(file, rank):
 
     return ((file - 1) * unit,((8 - rank) * unit))
@@ -83,17 +85,11 @@ def get_piece_on_square(file, rank):
             return piece
 
 def is_dangerous(file, rank):
-    all_legal_moves = []
-    
-    for piece in board:
-    
-        if piece.colour != turn:
-    
-            piece.calculate_legal_moves()
-    
-            all_legal_moves.append(*piece.legal_moves)
+    global all_legal_moves
 
-    if (file, rank, "capture") in all_legal_moves:
+    calculate_all_legal_moves()
+
+    if (file, rank) in all_legal_moves or (file, rank, "capture") in all_legal_moves:
 
         return True
 
@@ -108,8 +104,18 @@ def is_check(colour_of_moved_piece):
 
             king = piece
 
-    
+def calculate_all_legal_moves():
+    global all_legal_moves
 
+    all_legal_moves = []
+            
+    for piece in board:
+            
+        if piece.colour != turn:
+            if piece.type != "king":
+                piece.calculate_legal_moves()
+
+                all_legal_moves.extend(piece.legal_moves)
 
 
 
@@ -141,14 +147,18 @@ class Piece:
 
         self.rank = new_rank
 
-        
+        all_legal_moves = []
 
         if self.colour == "w":
-            print("Yes")
+
             turn = "b"
         else:
             
             turn = "w"
+
+        for piece in board:
+            
+            piece.legal_moves = []
 
     def see_legal_moves(self):
         self.calculate_legal_moves()
@@ -672,7 +682,6 @@ class Knight(Piece):
                 else:
                     self.legal_moves.append((self.file - 1, self.rank - 2))
 
-
 class King(Piece):
 
     def __init__(self, file, rank, colour):
@@ -695,95 +704,109 @@ class King(Piece):
         if len(self.legal_moves) == 0:
             # To the Top right
             if self.file + 1 < 9 and self.rank + 1 < 9:
+                # if not is_dangerous(self.file + 1, self.rank + 1):
+                        
+                    if is_piece_on_square(self.file + 1, self.rank + 1):
 
-                if is_piece_on_square(self.file + 1, self.rank + 1):
+                        if not self.colour == get_piece_on_square(self.file + 1, self.rank + 1).colour:
 
-                    if not self.colour == get_piece_on_square(self.file + 1, self.rank + 1).colour:
+                            self.legal_moves.append((self.file + 1, self.rank + 1, "capture"))
 
-                        self.legal_moves.append((self.file + 1, self.rank + 1, "capture"))
-
-                else:
-                    self.legal_moves.append((self.file + 1, self.rank + 1))
+                    else:
+                        self.legal_moves.append((self.file + 1, self.rank + 1))
             # To the bottom right
             if self.file + 1 < 9 and self.rank - 1 > 0:
+                # if not is_dangerous(self.file + 1, self.rank - 1):
+                    if is_piece_on_square(self.file + 1, self.rank - 1):
 
-                if is_piece_on_square(self.file + 1, self.rank - 1):
+                        if not self.colour == get_piece_on_square(self.file + 1, self.rank - 1).colour:
 
-                    if not self.colour == get_piece_on_square(self.file + 1, self.rank - 1).colour:
+                            self.legal_moves.append((self.file + 1, self.rank - 1, "capture"))
 
-                        self.legal_moves.append((self.file + 1, self.rank - 1, "capture"))
+                    else:
+                        self.legal_moves.append((self.file + 1, self.rank - 1))
 
-                else:
-                    self.legal_moves.append((self.file + 1, self.rank - 1))
             # To the Right
             if self.file + 1 < 9:
-    
-                if is_piece_on_square(self.file + 1, self.rank):
 
-                    if not self.colour == get_piece_on_square(self.file + 1, self.rank).colour:
+                # if not is_dangerous(self.file + 1, self.rank):
 
-                       self.legal_moves.append((self.file + 1, self.rank, "capture"))
+                    if is_piece_on_square(self.file + 1, self.rank):
 
-                else:
-                    self.legal_moves.append((self.file + 1, self.rank))
+                        if not self.colour == get_piece_on_square(self.file + 1, self.rank).colour:
+
+                            self.legal_moves.append((self.file + 1, self.rank, "capture"))
+
+                    else:
+                        self.legal_moves.append((self.file + 1, self.rank))
 
             # To the Top Left
 
             if self.file - 1 > 0 and self.rank + 1 < 9:
 
-                if is_piece_on_square(self.file - 1, self.rank + 1):
+                # if not is_dangerous(self.file - 1, self.rank + 1):
 
-                    if not self.colour == get_piece_on_square(self.file - 1, self.rank + 1).colour:
+                    if is_piece_on_square(self.file - 1, self.rank + 1):
 
-                        self.legal_moves.append((self.file - 1, self.rank + 1, "capture"))
+                        if not self.colour == get_piece_on_square(self.file - 1, self.rank + 1).colour:
 
-                else:
-                    self.legal_moves.append((self.file - 1, self.rank + 1))
+                            self.legal_moves.append((self.file - 1, self.rank + 1, "capture"))
+
+                    else:
+                        self.legal_moves.append((self.file - 1, self.rank + 1))
 
             # To the Bottom Left
             if self.file - 1 > 0 and self.rank - 1 > 0:
 
-                if is_piece_on_square(self.file - 1, self.rank - 1):
+                # if not is_dangerous(self.file - 1, self.rank - 1):
 
-                    if not self.colour == get_piece_on_square(self.file - 1, self.rank - 1).colour:
+                    if is_piece_on_square(self.file - 1, self.rank - 1):
 
-                        self.legal_moves.append((self.file - 1, self.rank - 1, "capture"))
-                else:
-                    self.legal_moves.append((self.file - 1, self.rank - 1))
+                        if not self.colour == get_piece_on_square(self.file - 1, self.rank - 1).colour:
+
+                            self.legal_moves.append((self.file - 1, self.rank - 1, "capture"))
+                    else:
+                        self.legal_moves.append((self.file - 1, self.rank - 1))
             # To the Left
             if self.file - 1 > 0:
 
-                if is_piece_on_square(self.file - 1, self.rank):
+                # if not is_dangerous(self.file - 1, self.rank):
 
-                    if not self.colour == get_piece_on_square(self.file - 1, self.rank).colour:
+                    if is_piece_on_square(self.file - 1, self.rank):
 
-                        self.legal_moves.append((self.file - 1, self.rank, "capture"))
+                        if not self.colour == get_piece_on_square(self.file - 1, self.rank).colour:
 
-                else:
+                            self.legal_moves.append((self.file - 1, self.rank, "capture"))
 
-                    self.legal_moves.append((self.file - 1, self.rank))
+                    else:
+
+                        self.legal_moves.append((self.file - 1, self.rank))
 
             # To the Bottom
             if self.rank - 1 > 0:
 
-                if is_piece_on_square(self.file, self.rank - 1):
+                # if not is_dangerous(self.file, self.rank - 1):
 
-                    if not self.colour == get_piece_on_square(self.file, self.rank - 1).colour:
+                    if is_piece_on_square(self.file, self.rank - 1):
 
-                        self.legal_moves.append((self.file, self.rank - 1, "capture"))
-                else:
-                    self.legal_moves.append((self.file, self.rank - 1))
+                        if not self.colour == get_piece_on_square(self.file, self.rank - 1).colour:
+
+                            self.legal_moves.append((self.file, self.rank - 1, "capture"))
+                    else:
+                        self.legal_moves.append((self.file, self.rank - 1))
 
             # To the Top
             if self.rank + 1 < 9:
 
-                if is_piece_on_square(self.file, self.rank + 1):
+                # if not is_dangerous(self.file, self.rank + 1):
 
-                    if not self.colour == get_piece_on_square(self.file, self.rank + 1).colour:
+                    if is_piece_on_square(self.file, self.rank + 1):
 
-                        self.legal_moves.append((self.file, self.rank + 1, "capture"))
-                else:
-                    self.legal_moves.append((self.file, self.rank + 1))
+                        if not self.colour == get_piece_on_square(self.file, self.rank + 1).colour:
+
+                            self.legal_moves.append((self.file, self.rank + 1, "capture"))
+                    else:
+                        self.legal_moves.append((self.file, self.rank + 1))
 
 
 
