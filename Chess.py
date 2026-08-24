@@ -89,11 +89,17 @@ def is_dangerous(file, rank):
 
     calculate_all_legal_moves()
 
+    for piece in board:
+
+        if piece.type == "king" and piece.colour != turn:
+
+            if (file, rank) in piece.legal_moves or (file, rank, "capture") in piece.legal_moves:
+                return True
     if (file, rank) in all_legal_moves or (file, rank, "capture") in all_legal_moves:
 
         return True
 
-
+    
     return False
 
 def is_check(colour_of_moved_piece):
@@ -112,7 +118,9 @@ def calculate_all_legal_moves():
     for piece in board:
             
         if piece.colour != turn:
+
             if piece.type != "king":
+
                 piece.calculate_legal_moves()
 
                 all_legal_moves.extend(piece.legal_moves)
@@ -120,7 +128,7 @@ def calculate_all_legal_moves():
 
 
 
-class Piece:
+class Piece: 
     def __init__(self, file, rank, colour):
 
         self.file = file
@@ -273,12 +281,17 @@ class Queen(Piece):
 
             # To the Right
             for i in range(self.file + 1, 9):
+
                 if self.file + 1 < 9 and self.rank + 1 < 9:
+
                     if is_piece_on_square(i, self.rank):
 
                         if get_piece_on_square(i, self.rank).colour != self.colour:
 
                             self.legal_moves.append((i, self.rank, "capture"))
+
+                        else:
+                            self.legal_moves.append(i, self.rank, "protect")
                         break
                     else:
                         self.legal_moves.append((i, self.rank))
@@ -294,6 +307,8 @@ class Queen(Piece):
                         if get_piece_on_square(i, self.rank).colour != self.colour:
 
                             self.legal_moves.append((i, self.rank, "capture"))
+                        else:
+                            self.legal_moves.append((i, self.rank, "protect"))
                         break
                     else:
                         self.legal_moves.append((i, self.rank))
@@ -308,7 +323,8 @@ class Queen(Piece):
                         if get_piece_on_square(self.file, i).colour != self.colour:
 
                             self.legal_moves.append((self.file, i, "capture"))
-
+                        else:
+                            self.legal_moves.append((self.file, i, "protect"))
                         break
                     else:
                         self.legal_moves.append((self.file, i))
@@ -324,7 +340,8 @@ class Queen(Piece):
                         if get_piece_on_square(self.file, i).colour != self.colour:
 
                             self.legal_moves.append((self.file, i, "capture"))
-
+                        else:
+                            self.legal_moves.append((self.file, i, "protect"))
                         break
                     else:
                         self.legal_moves.append((self.file, i))
@@ -340,8 +357,12 @@ class Queen(Piece):
                         if get_piece_on_square(self.file + i, self.rank + i).colour != self.colour:
                         
                             self.legal_moves.append((self.file + i, self.rank + i, "capture"))
+
+                        else:
+
+                            self.legal_moves.append((i, self.rank, "protect")) 
                         break
-            
+
                     else:
 
                         self.legal_moves.append((self.file  + i, self.rank + i))
@@ -356,6 +377,9 @@ class Queen(Piece):
 
                         self.legal_moves.append((self.file - i, self.rank + i, "capture"))
 
+                    else:
+
+                        self.legal_moves.append((self.file - i, self.rank + i, "protect"))
                     break
 
                 if self.file - i > 0 and self.rank + i < 9:
@@ -371,6 +395,8 @@ class Queen(Piece):
                     if get_piece_on_square(self.file - i, self.rank - i).colour != self.colour:
 
                         self.legal_moves.append((self.file - i, self.rank - i, "capture"))
+
+                    
                     break
 
                 if self.file - i > 0 and self.rank - i > 0:
@@ -704,7 +730,7 @@ class King(Piece):
         if len(self.legal_moves) == 0:
             # To the Top right
             if self.file + 1 < 9 and self.rank + 1 < 9:
-                # if not is_dangerous(self.file + 1, self.rank + 1):
+                if not is_dangerous(self.file + 1, self.rank + 1):
                         
                     if is_piece_on_square(self.file + 1, self.rank + 1):
 
@@ -716,7 +742,7 @@ class King(Piece):
                         self.legal_moves.append((self.file + 1, self.rank + 1))
             # To the bottom right
             if self.file + 1 < 9 and self.rank - 1 > 0:
-                # if not is_dangerous(self.file + 1, self.rank - 1):
+                if not is_dangerous(self.file + 1, self.rank - 1):
                     if is_piece_on_square(self.file + 1, self.rank - 1):
 
                         if not self.colour == get_piece_on_square(self.file + 1, self.rank - 1).colour:
@@ -729,7 +755,7 @@ class King(Piece):
             # To the Right
             if self.file + 1 < 9:
 
-                # if not is_dangerous(self.file + 1, self.rank):
+                if not is_dangerous(self.file + 1, self.rank):
 
                     if is_piece_on_square(self.file + 1, self.rank):
 
@@ -744,7 +770,7 @@ class King(Piece):
 
             if self.file - 1 > 0 and self.rank + 1 < 9:
 
-                # if not is_dangerous(self.file - 1, self.rank + 1):
+                if not is_dangerous(self.file - 1, self.rank + 1):
 
                     if is_piece_on_square(self.file - 1, self.rank + 1):
 
@@ -758,7 +784,7 @@ class King(Piece):
             # To the Bottom Left
             if self.file - 1 > 0 and self.rank - 1 > 0:
 
-                # if not is_dangerous(self.file - 1, self.rank - 1):
+                if not is_dangerous(self.file - 1, self.rank - 1):
 
                     if is_piece_on_square(self.file - 1, self.rank - 1):
 
@@ -770,7 +796,7 @@ class King(Piece):
             # To the Left
             if self.file - 1 > 0:
 
-                # if not is_dangerous(self.file - 1, self.rank):
+                if not is_dangerous(self.file - 1, self.rank):
 
                     if is_piece_on_square(self.file - 1, self.rank):
 
@@ -785,7 +811,9 @@ class King(Piece):
             # To the Bottom
             if self.rank - 1 > 0:
 
-                # if not is_dangerous(self.file, self.rank - 1):
+                if not is_dangerous(self.file, self.rank - 1):
+                    
+                    is_dangerous(self.file, self.rank - 1)
 
                     if is_piece_on_square(self.file, self.rank - 1):
 
@@ -798,7 +826,7 @@ class King(Piece):
             # To the Top
             if self.rank + 1 < 9:
 
-                # if not is_dangerous(self.file, self.rank + 1):
+                if not is_dangerous(self.file, self.rank + 1):
 
                     if is_piece_on_square(self.file, self.rank + 1):
 
