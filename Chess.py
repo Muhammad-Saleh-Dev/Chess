@@ -103,18 +103,26 @@ def is_dangerous(file, rank):
     
     return False
 
-def is_check(moved_piece):
+def is_check():
+    for king in board:
 
-    for piece in board:
+        if king.type == "king" and king.colour == turn:
 
-        if piece.type == "king" and piece.colour != moved_piece.colour:
+            # king is king, piece_1 is the opponent's piece
+            for piece in board:
 
-            king = piece
-    for legal_move in moved_piece.legal_moves:
+                if piece.colour != king.colour:
 
-        if (king.file, king.rank) == legal_move or (king.file, king.rank, "capture") == legal_move:
+                    piece.legal_moves = []
 
-            return True
+                    piece.calculate_legal_moves()
+
+                    for legal_move in piece.legal_moves:
+
+                        if (king.file, king.rank) == legal_move or (king.file, king.rank, "capture") == legal_move:
+
+                            return True
+    return False
 
 def calculate_all_capturable_moves():
     global all_capturable_moves
@@ -174,6 +182,60 @@ def calculate_all_capturable_moves():
                 
                 all_capturable_moves.extend(piece.legal_moves)
 
+def find_safe_moves():
+    global safe_moves
+
+    safe_moves = []
+
+    for piece in board:
+
+        if piece.colour != turn:
+
+            piece.legal_moves = []
+
+            piece.calculate_legal_moves()
+
+            for legal_move in piece.legal_moves:
+
+                a = piece.file
+
+                b = piece.rank
+
+                piece.move(legal_move[0], legal_move[1])
+
+                if not is_check():
+
+                    safe_moves.append((piece, legal_move))
+
+                piece.move(a, b)
+
+def filter_safe_moves(piece,move):
+
+    global turn
+
+    file = piece.file
+    rank = piece.rank
+
+
+    piece.move(move[0], move[1])
+
+    if is_check():
+
+        piece.move(file, rank)
+
+        turn = piece.colour
+
+        return False
+
+    else:
+
+        piece.move(file, rank)
+
+        turn = piece.colour
+
+        return True
+
+
 
 
 
@@ -207,8 +269,6 @@ class Piece:
 
         self.pos_x, self.pos_y = convert_into_pos(self.file,self.rank)
 
-        all_capturable_moves = []
-
         if self.colour == "w":
 
             turn = "b"
@@ -220,7 +280,7 @@ class Piece:
             
             piece.legal_moves = []
 
-        if is_check(self):
+        if is_check():
             if self.colour == "w":
 
                 checked = "b"
@@ -243,10 +303,30 @@ class Piece:
                     if not "protect" in legal_move:
 
                         pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+        else:
 
-            
+            self.calculate_legal_moves()
 
-   
+            find_safe_moves()
+
+            print(safe_moves)
+
+            for legal_move in self.legal_moves:
+
+                if not (self, legal_move) in safe_moves:
+
+                    self.legal_moves.remove(legal_move)          
+
+            for legal_move in self.legal_moves:
+
+                if "capture" in legal_move:
+
+                    pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
+
+                else:
+                    if not "protect" in legal_move:
+
+                        pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class Pawn(Piece):
 
