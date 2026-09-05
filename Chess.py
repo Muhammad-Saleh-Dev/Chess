@@ -24,7 +24,7 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 
 turn = "w"
 
-check = None
+checked = None
 
 all_capturable_moves = None
 
@@ -110,6 +110,11 @@ def is_check(moved_piece):
         if piece.type == "king" and piece.colour != moved_piece.colour:
 
             king = piece
+    for legal_move in moved_piece.legal_moves:
+
+        if (king.file, king.rank) == legal_move or (king.file, king.rank, "capture") == legal_move:
+
+            return True
 
 def calculate_all_capturable_moves():
     global all_capturable_moves
@@ -122,15 +127,13 @@ def calculate_all_capturable_moves():
 
             if piece.type != "king":
 
-                piece.calculate_legal_moves()
-
                 if piece.type == "pawn":
+                    piece.legal_moves = []
+                    # for move in piece.legal_moves:
 
-                    for move in piece.legal_moves:
+                        # if move[0] == piece.file:
 
-                        if move[0] == piece.file:
-
-                            piece.legal_moves.remove(move)
+                        #     piece.legal_moves.remove(move)
 
                     if piece.colour == "w":
 
@@ -143,24 +146,39 @@ def calculate_all_capturable_moves():
                                                   
                                                   (piece.file - 1, piece.rank - 1)])
                         
-                if piece.type == "queen" or piece.type == "rook" or piece.type == "bishop":
+                elif piece.type == "queen" or piece.type == "rook" or piece.type == "bishop":
 
                     for piece_1 in board:
 
-                        if piece_1.type == "king" and piece_1.colour != turn:
+                        if piece_1.type == "king" and piece_1.colour != piece.colour:
 
                             board.remove(piece_1)
+
+
+
+                            piece.legal_moves = []
 
                             piece.calculate_legal_moves()
 
                             board.append(piece_1)
 
+                    piece.legal_moves = []
+
+                    piece.calculate_legal_moves()
+
+                else:
+                    piece.legal_moves = []
+
+                    piece.calculate_legal_moves()
+
+                
                 all_capturable_moves.extend(piece.legal_moves)
 
 
 
 
 class Piece: 
+
     def __init__(self, file, rank, colour):
 
         self.file = file
@@ -175,7 +193,7 @@ class Piece:
 
     def move(self, new_file, new_rank):
 
-        global turn
+        global turn, checked, all_capturable_moves
 
         if is_piece_on_square(new_file, new_rank):
 
@@ -186,6 +204,8 @@ class Piece:
         self.file = new_file
 
         self.rank = new_rank
+
+        self.pos_x, self.pos_y = convert_into_pos(self.file,self.rank)
 
         all_capturable_moves = []
 
@@ -200,23 +220,33 @@ class Piece:
             
             piece.legal_moves = []
 
-    def see_legal_moves(self):
-        self.calculate_legal_moves()
+        if is_check(self):
+            if self.colour == "w":
 
-        for legal_move in self.legal_moves:
-
-            if "capture" in legal_move:
-
-                pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
-
+                checked = "b"
             else:
-                if not "protect" in legal_move:
+                checked = "w"
+        else:
+            checked = None
 
-                    pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+    def see_legal_moves(self):
+        if checked == None:
+            self.calculate_legal_moves()
 
-        
+            for legal_move in self.legal_moves:
 
-        self.pos_x, self.pos_y = convert_into_pos(self.file,self.rank)
+                if "capture" in legal_move:
+
+                    pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
+
+                else:
+                    if not "protect" in legal_move:
+
+                        pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+
+            
+
+   
 
 class Pawn(Piece):
 
@@ -634,16 +664,6 @@ class Bishop(Piece):
                     else:
 
                         self.legal_moves.append((self.file + i, self.rank - i))   
-
-        for legal_move in self.legal_moves:
-
-            if "capture" in legal_move:
-
-                pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
-
-            else:
-
-                pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class Knight(Piece):
     def __init__(self, file, rank, colour):
