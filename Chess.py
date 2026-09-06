@@ -26,7 +26,7 @@ turn = "w"
 
 checked = None
 
-all_capturable_moves = None
+all_dangerous_moves = None
 
 pygame.display.set_caption("Chess")
 
@@ -86,9 +86,9 @@ def get_piece_on_square(file, rank):
             return piece
 
 def is_dangerous(file, rank):
-    global all_capturable_moves
+    global all_dangerous_moves
 
-    calculate_all_capturable_moves()
+    calculate_all_dangerous_moves()
 
     # for piece in board:
 
@@ -96,7 +96,7 @@ def is_dangerous(file, rank):
 
     #         if (file, rank) in piece.legal_moves or (file, rank, "capture") in piece.legal_moves:
     #             return True
-    if (file, rank) in all_capturable_moves or (file, rank, "capture") in all_capturable_moves or (file, rank, "protect") in all_capturable_moves:
+    if (file, rank) in all_dangerous_moves or (file, rank, "capture") in all_dangerous_moves or (file, rank, "protect") in all_dangerous_moves:
 
         return True
 
@@ -107,8 +107,7 @@ def is_check():
     for king in board:
 
         if king.type == "king" and king.colour == turn:
-
-            # king is king, piece_1 is the opponent's piece
+            
             for piece in board:
 
                 if piece.colour != king.colour:
@@ -124,10 +123,10 @@ def is_check():
                             return True
     return False
 
-def calculate_all_capturable_moves():
-    global all_capturable_moves
+def calculate_all_dangerous_moves():
+    global all_dangerous_moves
 
-    all_capturable_moves = []
+    all_dangerous_moves = []
             
     for piece in board:
             
@@ -180,7 +179,7 @@ def calculate_all_capturable_moves():
                     piece.calculate_legal_moves()
 
                 
-                all_capturable_moves.extend(piece.legal_moves)
+                all_dangerous_moves.extend(piece.legal_moves)
 
 def find_safe_moves():
     global safe_moves
@@ -189,7 +188,7 @@ def find_safe_moves():
 
     for piece in board:
 
-        if piece.colour != turn:
+        if piece.colour == turn:
 
             piece.legal_moves = []
 
@@ -255,7 +254,7 @@ class Piece:
 
     def move(self, new_file, new_rank):
 
-        global turn, checked, all_capturable_moves
+        global turn, checked, all_dangerous_moves
 
         if is_piece_on_square(new_file, new_rank):
 
@@ -304,6 +303,8 @@ class Piece:
 
                         pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
         else:
+            print("shit")
+
 
             self.calculate_legal_moves()
 
