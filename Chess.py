@@ -270,7 +270,14 @@ def filter_safe_moves(piece,move):
 
         return True
 
+def check_for_checkmate():
+    
 
+    find_safe_moves()
+
+    if len(safe_moves) == 0:
+
+            sys.exit()
 
 
 
@@ -321,6 +328,7 @@ class Piece:
                 checked = "b"
             else:
                 checked = "w"
+            check_for_checkmate() 
         else:
             checked = None
 
@@ -1072,12 +1080,15 @@ board = [(Rook(1, 1, "w")), (Knight(2, 1, "w")), (Bishop(3, 1, "w")), (Queen(4, 
 
 
 class ChessGame:
+
     def __init__(self):
         global selected_piece
 
     def check_where_clicked(self, event):
         global selected_piece, turn
+
         changed = False
+
         click_square = convert_into_file_rank(*event.pos)
 
         for piece in board:
@@ -1120,19 +1131,51 @@ class ChessGame:
         first_light = False
         
         for y in range(0,8):
+
             if first_light:
+
                 for x in range(0,8,2):
-                    pygame.draw.rect(screen, light, (x * unit, y * unit, unit, unit))
+
+                    if selected_piece and (x, y) == (selected_piece.file - 1, 8 - selected_piece.rank):
+
+                        pygame.draw.rect(screen, (185, 202, 66), (x * unit, y * unit, unit, unit))
+
+                    else:
+
+                        pygame.draw.rect(screen, light, (x * unit, y * unit, unit, unit))
 
                 for x in range(1,8,2):
-                    pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
+
+                    if selected_piece and (x, y) == (selected_piece.file - 1, 8-selected_piece.rank):
+                    
+                        pygame.draw.rect(screen, (185, 202, 66), (x * unit, y * unit, unit, unit))
+                    
+                    else:
+                    
+                        pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
 
             else:
+
                 for x in range(0,8,2):
-                    pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
+
+                    if selected_piece and (x, y) == (selected_piece.file - 1, 8-selected_piece.rank):
+
+                        pygame.draw.rect(screen, (185, 202, 66), (x * unit, y * unit, unit, unit))
+
+                    else:
+
+                        pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
 
                 for x in range(1,8,2):
-                    pygame.draw.rect(screen, light, (x * unit, y * unit, unit, unit))
+
+                    if selected_piece and (x, y) == (selected_piece.file - 1, 8-selected_piece.rank):
+
+                        pygame.draw.rect(screen, (185, 202, 66), (x * unit, y * unit, unit, unit))
+
+                    else:
+
+                        pygame.draw.rect(screen, light, (x * unit, y * unit, unit, unit))
+
 
 
             first_light = not first_light
@@ -1164,8 +1207,6 @@ class ChessGame:
                 if selected_piece.colour == turn:
 
                     selected_piece.see_legal_moves()
-
-                    pygame.draw.rect(screen, (185, 202, 66), (*convert_into_pos(selected_piece.file, selected_piece.rank), unit, unit))
 
             pygame.display.flip()
 
