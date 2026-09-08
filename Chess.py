@@ -26,6 +26,10 @@ turn = "w"
 
 checked = None
 
+safe_legal_moves = []
+
+selected_piece = None
+
 all_dangerous_moves = None
 
 pygame.display.set_caption("Chess")
@@ -121,6 +125,7 @@ def is_check():
                         if (king.file, king.rank) == legal_move or (king.file, king.rank, "capture") == legal_move:
 
                             return True
+            break
     return False
 
 def calculate_all_dangerous_moves():
@@ -182,9 +187,11 @@ def calculate_all_dangerous_moves():
                 all_dangerous_moves.extend(piece.legal_moves)
 
 def find_safe_moves():
-    global safe_moves
+    global safe_moves, turn
 
     safe_moves = []
+
+    king_colour = turn
 
     for piece in board:
 
@@ -196,17 +203,46 @@ def find_safe_moves():
 
             for legal_move in piece.legal_moves:
 
+                if "protect" in legal_move:
+
+                    continue
+
+                if is_piece_on_square(legal_move[0], legal_move[1]):
+
+                    captured_piece = get_piece_on_square(legal_move[0], legal_move[1])
+
+                    board.remove(captured_piece)
+
+                else:
+                    captured_piece = None
+
+                turn = king_colour
+
                 a = piece.file
 
                 b = piece.rank
 
-                piece.move(legal_move[0], legal_move[1])
+                piece.file = legal_move[0]
+
+                piece.rank = legal_move[1]
+
+                piece.pos_x, piece.pos_y = convert_into_pos(piece.file, piece.rank)
+
 
                 if not is_check():
 
                     safe_moves.append((piece, legal_move))
 
-                piece.move(a, b)
+
+                piece.file = a
+
+                piece.rank = b
+
+                piece.pos_x, piece.pos_y = convert_into_pos(piece.file, piece.rank)
+
+                if captured_piece:
+
+                    board.append(captured_piece)
 
 def filter_safe_moves(piece,move):
 
@@ -289,45 +325,28 @@ class Piece:
             checked = None
 
     def see_legal_moves(self):
-        if checked == None:
-            self.calculate_legal_moves()
 
-            for legal_move in self.legal_moves:
+        self.calculate_legal_moves()
 
-                if "capture" in legal_move:
+        if checked is None:
 
-                    pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
+            moves_to_draw = self.legal_moves
 
-                else:
-                    if not "protect" in legal_move:
-
-                        pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
         else:
-            print("shit")
-
-
-            self.calculate_legal_moves()
 
             find_safe_moves()
 
-            print(safe_moves)
+            moves_to_draw = [m for m in self.legal_moves if (self, m) in safe_moves]
 
-            for legal_move in self.legal_moves:
+        for legal_move in moves_to_draw:
 
-                if not (self, legal_move) in safe_moves:
+            if "capture" in legal_move:
 
-                    self.legal_moves.remove(legal_move)          
+                pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
 
-            for legal_move in self.legal_moves:
+            elif "protect" not in legal_move:
 
-                if "capture" in legal_move:
-
-                    pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
-
-                else:
-                    if not "protect" in legal_move:
-
-                        pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
+                pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
 class Pawn(Piece):
 
@@ -1054,10 +1073,10 @@ board = [(Rook(1, 1, "w")), (Knight(2, 1, "w")), (Bishop(3, 1, "w")), (Queen(4, 
 
 class ChessGame:
     def __init__(self):
-
-        self.selected_piece = None
+        global selected_piece
 
     def check_where_clicked(self, event):
+        global selected_piece, turn
         changed = False
         click_square = convert_into_file_rank(*event.pos)
 
@@ -1065,29 +1084,29 @@ class ChessGame:
 
             if (piece.file, piece.rank)== click_square and piece.colour == turn:
 
-                if not self.selected_piece == piece:
+                if not selected_piece == piece:
 
                     changed = True
 
-                self.selected_piece = piece
+                selected_piece = piece
             if piece == board[-1] and not changed:
                     # This if block check if the selected piece has legal moves on the selected
                     # square and if it does, it moves the piece to that square
 
 
-                if self.selected_piece is not None:
+                if selected_piece is not None:
                             
-                        if (click_square in self.selected_piece.legal_moves) or ((*click_square, "capture") in self.selected_piece.legal_moves):
+                        if (click_square in selected_piece.legal_moves) or ((*click_square, "capture") in selected_piece.legal_moves):
                     
-                            self.selected_piece.move(*click_square)
+                            selected_piece.move(*click_square)
                     
-                            self.selected_piece.legal_moves = []
+                            selected_piece.legal_moves = []
                     
-                            self.selected_piece = None
+                            selected_piece = None
 
                 # If the clicked square is literally empty, it deselects the selected piece
 
-                self.selected_piece = None
+                selected_piece = None
 
 
     def draw_piece(self, piece, file, rank):
@@ -1124,6 +1143,7 @@ class ChessGame:
             
 
     def run(self):
+        global selected_piece, turn
         running = True
         while running:
 
@@ -1139,11 +1159,13 @@ class ChessGame:
 
             self.draw_board()
 
-            if self.selected_piece is not None:
+            if selected_piece is not None:
 
-                if self.selected_piece.colour == turn:
+                if selected_piece.colour == turn:
 
-                    self.selected_piece.see_legal_moves()
+                    selected_piece.see_legal_moves()
+
+                    pygame.draw.rect(screen, (185, 202, 66), (*convert_into_pos(selected_piece.file, selected_piece.rank), unit, unit))
 
             pygame.display.flip()
 
