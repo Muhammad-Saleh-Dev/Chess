@@ -271,7 +271,6 @@ def filter_safe_moves(piece,move):
         return True
 
 def check_for_checkmate():
-    
 
     find_safe_moves()
 
