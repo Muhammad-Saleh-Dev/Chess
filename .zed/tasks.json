@@ -1,0 +1,9 @@
+[
+  {
+    "label": "Run Python File",
+    "command": "C:\\Users\\Saleh\\AppData\\Local\\Python\\pythoncore-3.13-64\\python.exe",
+    "args": ["$ZED_FILE"],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  }
+]

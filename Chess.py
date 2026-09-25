@@ -331,6 +331,13 @@ class Piece:
         else:
             checked = None
 
+        if self.type == "pawn":
+            
+            if self.rank == 8 or self.rank == 1:
+
+                promoted = self
+
+
     def see_legal_moves(self):
 
         self.calculate_legal_moves()
@@ -429,6 +436,33 @@ class Pawn(Piece):
 
                     self.legal_moves.append((self.file - 1, self.rank - 1, "capture"))
 
+
+    def promotion(self):
+
+        global promotion_time
+
+        while promotion_time:
+
+            if self.colour == "w":
+
+                chess_game.draw_piece("q", self.file, self.rank)
+
+                chess_game.draw_piece("r", self.file, self.rank - 1)
+
+                chess_game.draw_piece("b", self.file, self.rank - 2)
+
+                chess_game.draw_piece("n", self.file, self.rank - 3)
+
+            elif self.colour == "b":
+
+                chess_game.draw_piece("Q", self.file, self.rank)
+
+                chess_game.draw_piece("R", self.file, self.rank + 1)
+
+                chess_game.draw_piece("B", self.file, self.rank + 2)
+
+                chess_game.draw_piece("N", self.file, self.rank + 3)
+    
 class Queen(Piece):
     def __init__(self, file, rank, colour):
 
