@@ -1,0 +1,20 @@
+{
+  "lsp": {
+    "ruff": {
+      "initialization_options": {
+        "settings": {
+          "exclude": ["*"]
+        }
+      }
+    }
+  },
+{
+  "diagnostics_max_severity": "error",
+  "scrollbar": {
+    "diagnostics": "error"
+  },
+  "project_panel": {
+    "show_diagnostics": "errors"
+  }
+}
+}

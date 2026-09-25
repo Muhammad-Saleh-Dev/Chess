@@ -6,7 +6,7 @@ from platform import system
 
 pygame.init()
 
-screen_height = 600 
+screen_height = 600
 
 screen_width = 600
 
@@ -20,11 +20,15 @@ green = (0, 255, 0)
 
 yellow = (255, 255, 0)
 
+white = (255, 255, 255)
+
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 turn = "w"
 
 checked = None
+
+promotion = None
 
 safe_legal_moves = []
 
@@ -78,7 +82,7 @@ def is_piece_on_square(file, rank):
     if any(piece.file == file and piece.rank == rank for piece in board):
 
         return True
-    
+
     return False
 
 def get_piece_on_square(file, rank):
@@ -104,14 +108,14 @@ def is_dangerous(file, rank):
 
         return True
 
-    
+
     return False
 
 def is_check():
     for king in board:
 
         if king.type == "king" and king.colour == turn:
-            
+
             for piece in board:
 
                 if piece.colour != king.colour:
@@ -132,9 +136,9 @@ def calculate_all_dangerous_moves():
     global all_dangerous_moves
 
     all_dangerous_moves = []
-            
+
     for piece in board:
-            
+
         if piece.colour != turn:
 
             if piece.type != "king":
@@ -150,14 +154,14 @@ def calculate_all_dangerous_moves():
                     if piece.colour == "w":
 
                         piece.legal_moves.extend([(piece.file + 1, piece.rank + 1),
-                                                  
+
                                                   (piece.file - 1, piece.rank + 1)])
                     elif piece.colour == "b":
 
                         piece.legal_moves.extend([(piece.file + 1, piece.rank - 1),
-                                                  
+
                                                   (piece.file - 1, piece.rank - 1)])
-                        
+
                 elif piece.type == "queen" or piece.type == "rook" or piece.type == "bishop":
 
                     for piece_1 in board:
@@ -183,7 +187,7 @@ def calculate_all_dangerous_moves():
 
                     piece.calculate_legal_moves()
 
-                
+
                 all_dangerous_moves.extend(piece.legal_moves)
 
 def find_safe_moves():
@@ -280,7 +284,7 @@ def check_for_checkmate():
 
 
 
-class Piece: 
+class Piece:
 
     def __init__(self, file, rank, colour):
 
@@ -314,11 +318,11 @@ class Piece:
 
             turn = "b"
         else:
-            
+
             turn = "w"
 
         for piece in board:
-            
+
             piece.legal_moves = []
 
         if is_check():
@@ -327,15 +331,19 @@ class Piece:
                 checked = "b"
             else:
                 checked = "w"
-            check_for_checkmate() 
+            check_for_checkmate()
         else:
             checked = None
 
         if self.type == "pawn":
-            
+
             if self.rank == 8 or self.rank == 1:
 
-                promoted = self
+                global promotion
+
+                promotion = self
+
+                print("Promotion:", promotion)
 
 
     def see_legal_moves(self):
@@ -383,12 +391,12 @@ class Pawn(Piece):
     def calculate_legal_moves(self):
 
         if len(self.legal_moves) == 0:
-            
+
             # This part checks if the pawn can move forward one square or two squares (if it's on its starting rank)
             # and if there are no pieces blocking its path
 
             if self.colour == "w" and  is_piece_on_square(self.file, self.rank + 1) == False:
-               
+
                 if self.rank == 2:
 
                     if is_piece_on_square(self.file, self.rank + 2) == False:
@@ -462,7 +470,7 @@ class Pawn(Piece):
                 chess_game.draw_piece("B", self.file, self.rank + 2)
 
                 chess_game.draw_piece("N", self.file, self.rank + 3)
-    
+
 class Queen(Piece):
     def __init__(self, file, rank, colour):
 
@@ -506,7 +514,7 @@ class Queen(Piece):
 
                 if self.file - 1 > 0 and self.rank - 1 > 0:
 
-                    if is_piece_on_square(i, self.rank):   
+                    if is_piece_on_square(i, self.rank):
 
                         if get_piece_on_square(i, self.rank).colour != self.colour:
 
@@ -559,12 +567,12 @@ class Queen(Piece):
                     if is_piece_on_square(self.file + i, self.rank + i):
 
                         if get_piece_on_square(self.file + i, self.rank + i).colour != self.colour:
-                        
+
                             self.legal_moves.append((self.file + i, self.rank + i, "capture"))
 
                         else:
 
-                            self.legal_moves.append((self.file + i, self.rank + i, "protect")) 
+                            self.legal_moves.append((self.file + i, self.rank + i, "protect"))
                         break
 
                     else:
@@ -572,7 +580,7 @@ class Queen(Piece):
                         self.legal_moves.append((self.file  + i, self.rank + i))
 
             # For the Diagonal Moves to the Top Left
-            
+
             for i in range(1, 9):
 
                 if is_piece_on_square(self.file - i, self.rank + i):
@@ -626,7 +634,7 @@ class Queen(Piece):
 
 
                     else:
-                        self.legal_moves.append((self.file + i, self.rank - i))     
+                        self.legal_moves.append((self.file + i, self.rank - i))
 
 class Rook(Piece):
 
@@ -659,7 +667,7 @@ class Rook(Piece):
                     else:
                         self.legal_moves.append((i, self.rank, "protect"))
                     break
-                    
+
                 else:
                     self.legal_moves.append((i, self.rank))
 
@@ -709,7 +717,7 @@ class Rook(Piece):
                     break
                 else:
                     self.legal_moves.append((self.file, i))
-        
+
 class Bishop(Piece):
 
     def __init__(self, file, rank, colour):
@@ -739,7 +747,7 @@ class Bishop(Piece):
                     if is_piece_on_square(self.file + i, self.rank + i):
 
                         if get_piece_on_square(self.file + i, self.rank + i).colour != self.colour:
-                        
+
                             self.legal_moves.append((self.file + i, self.rank + i, "capture"))
                         else:
                             self.legal_moves.append((self.file + i, self.rank + i, "protect"))
@@ -749,7 +757,7 @@ class Bishop(Piece):
                         self.legal_moves.append((self.file  + i, self.rank + i))
 
             # For the Diagonal Moves to the Top Left
-            
+
             for i in range(1, 9):
 
                 if self.file - i > 0 and self.rank + i < 9:
@@ -772,7 +780,7 @@ class Bishop(Piece):
             # For Diagonal Moves to the bottom left
 
             for i in range(1, 9):
-                
+
                 if self.file - i > 0 and self.rank - i > 0:
 
                     if is_piece_on_square(self.file - i, self.rank - i):
@@ -804,7 +812,8 @@ class Bishop(Piece):
 
                     else:
 
-                        self.legal_moves.append((self.file + i, self.rank - i))   
+                        self.legal_moves.append((self.file + i, self.rank - i))
+
 
 class Knight(Piece):
     def __init__(self, file, rank, colour):
@@ -824,9 +833,9 @@ class Knight(Piece):
         self.legal_moves = []
 
     def calculate_legal_moves(self):
-        
+
         if len(self.legal_moves) == 0:
-        
+
             # Go 1 square to the right and 2 squares above
             if self.file + 1 < 9 and self.rank + 2 < 9:
 
@@ -834,7 +843,7 @@ class Knight(Piece):
 
                     if not self.colour == get_piece_on_square(self.file + 1, self.rank + 2).colour:
 
-                        self.legal_moves.append((self.file + 1, self.rank + 2, "capture")) 
+                        self.legal_moves.append((self.file + 1, self.rank + 2, "capture"))
 
                     else:
                         self.legal_moves.append((self.file + 1, self.rank + 2, "protect"))
@@ -967,7 +976,7 @@ class King(Piece):
             # To the Top right
             if self.file + 1 < 9 and self.rank + 1 < 9:
                 if not is_dangerous(self.file + 1, self.rank + 1):
-                        
+
                     if is_piece_on_square(self.file + 1, self.rank + 1):
 
                         if not self.colour == get_piece_on_square(self.file + 1, self.rank + 1).colour:
@@ -1062,7 +1071,7 @@ class King(Piece):
             if self.rank - 1 > 0:
 
                 if not is_dangerous(self.file, self.rank - 1):
-                    
+
                     is_dangerous(self.file, self.rank - 1)
 
                     if is_piece_on_square(self.file, self.rank - 1):
@@ -1091,7 +1100,7 @@ class King(Piece):
                         self.legal_moves.append((self.file, self.rank + 1))
 
             # Ts part for removing the king's legal moves that would put it in check.
-            # It checks if any of the king's legal moves are on the same square as an 
+            # It checks if any of the king's legal moves are on the same square as an
             # opponent's king and removes those moves from the king's legal moves.
             for piece in board:
 
@@ -1139,13 +1148,13 @@ class ChessGame:
 
 
                 if selected_piece is not None:
-                            
+
                         if (click_square in selected_piece.legal_moves) or ((*click_square, "capture") in selected_piece.legal_moves):
-                    
+
                             selected_piece.move(*click_square)
-                    
+
                             selected_piece.legal_moves = []
-                    
+
                             selected_piece = None
 
                 # If the clicked square is literally empty, it deselects the selected piece
@@ -1156,13 +1165,13 @@ class ChessGame:
     def draw_piece(self, piece, file, rank):
 
         text_surface = font.render(PIECE_SYMBOLS[piece], True, (0,0,0))
-                   
+
         screen.blit(text_surface, convert_into_pos_for_pieces(file, rank))
-        
+
     def draw_board(self):
 
         first_light = False
-        
+
         for y in range(0,8):
 
             if first_light:
@@ -1180,11 +1189,11 @@ class ChessGame:
                 for x in range(1,8,2):
 
                     if selected_piece and (x, y) == (selected_piece.file - 1, 8-selected_piece.rank):
-                    
+
                         pygame.draw.rect(screen, (185, 202, 66), (x * unit, y * unit, unit, unit))
-                    
+
                     else:
-                    
+
                         pygame.draw.rect(screen, dark, (x * unit, y * unit, unit, unit))
 
             else:
@@ -1216,7 +1225,53 @@ class ChessGame:
         for piece in board:
 
             self.draw_piece(piece.symbol, piece.file, piece.rank)
-            
+
+        if promotion is not None:
+
+            if promotion.colour == "w":
+
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank), unit, unit))
+
+                self.draw_piece("Q", promotion.file, promotion.rank)
+
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank - 1), unit, unit))
+
+                self.draw_piece("N", promotion.file, promotion.rank -1)
+
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank - 2), unit, unit))
+
+                self.draw_piece("R", promotion.file, promotion.rank - 2)
+
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank - 3), unit, unit))
+
+                self.draw_piece("B", promotion.file, promotion.rank - 3)
+
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank - 4), unit, unit))
+
+                text_surface = font.render("X", True, (0, 0, 0))
+
+                screen.blit(text_surface, (convert_into_pos(promotion.file, promotion.rank - 4)[0] + unit//4, convert_into_pos(promotion.file, promotion.rank - 4)[1]))
+
+
+
+            else:
+
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank), unit, unit))
+
+                self.draw_piece("q", promotion.file, promotion.rank)
+
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank + 1), unit, unit))
+
+                self.draw_piece("n", promotion.file, promotion.rank + 1)
+
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank + 2), unit, unit))
+
+                self.draw_piece("r", promotion.file, promotion.rank + 2)
+
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank + 3), unit, unit))
+
+                self.draw_piece("b", promotion.file, promotion.rank + 3)
+
 
     def run(self):
         global selected_piece, turn
@@ -1228,9 +1283,9 @@ class ChessGame:
                 if event.type == pygame.QUIT:
 
                     running= False
-                    
+
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-            
+
                     self.check_where_clicked(event)
 
             self.draw_board()
@@ -1251,5 +1306,3 @@ chess_game.run()
 pygame.quit()
 
 sys.exit()
-
-
