@@ -302,17 +302,38 @@ class Piece:
 
         global turn, checked, all_dangerous_moves
 
-        if is_piece_on_square(new_file, new_rank):
+        self.previous_file = self.file
 
-            piece_to_remove = get_piece_on_square(new_file, new_rank)
-
-            board.remove(piece_to_remove)
+        self.previous_rank = self.rank
 
         self.file = new_file
 
         self.rank = new_rank
 
         self.pos_x, self.pos_y = convert_into_pos(self.file,self.rank)
+
+        if self.type == "pawn":
+
+            if self.rank == 8 or self.rank == 1:
+
+                global promotion
+
+                promotion = self
+
+        # In the case the pawn is capturing something, it does not get removed
+        # right away, but it gets removed after the promotion
+
+
+        if is_piece_on_square(new_file, new_rank):
+
+            print("called is piece on square")
+
+            if promotion == None:
+
+                piece_to_remove = get_piece_on_square(new_file, new_rank)
+
+                board.remove(piece_to_remove)
+
 
         if self.colour == "w":
 
@@ -335,15 +356,7 @@ class Piece:
         else:
             checked = None
 
-        if self.type == "pawn":
 
-            if self.rank == 8 or self.rank == 1:
-
-                global promotion
-
-                promotion = self
-
-                print("Promotion:", promotion)
 
 
     def see_legal_moves(self):
@@ -1127,11 +1140,133 @@ class ChessGame:
         global selected_piece
 
     def check_where_clicked(self, event):
-        global selected_piece, turn
+        global selected_piece, turn, promotion
 
         changed = False
 
         click_square = convert_into_file_rank(*event.pos)
+
+        if not (promotion == None):
+
+            print("promotion not none")
+
+            if promotion.colour == "w":
+
+                if click_square == (promotion.file, promotion.rank):
+
+                    board.append(Queen(promotion.file, promotion.rank, promotion.colour))
+
+                    for piece in board:
+
+                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                            board.remove(piece)
+
+                    promotion = None
+
+                elif click_square == (promotion.file, promotion.rank - 1):
+
+                    board.append(Knight(promotion.file, promotion.rank, promotion.colour))
+
+                    for piece in board:
+
+                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                            board.remove(piece)
+
+                    promotion = None
+
+
+                elif click_square == (promotion.file, promotion.rank - 2):
+
+                    board.append(Rook(promotion.file, promotion.rank, promotion.colour))
+
+                    for piece in board:
+
+                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                            board.remove(piece)
+
+                    promotion = None
+
+
+                elif click_square == (promotion.file, promotion.rank - 3):
+
+                    board.append(Bishop(promotion.file, promotion.rank, promotion.colour))
+
+                    for piece in board:
+
+                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                            board.remove(piece)
+
+                    promotion = None
+
+                elif click_square == (promotion.file,promotion.rank -4):
+
+                    self.file = self.previous_file
+
+                    self.rank = self.previous_rank
+
+                    promotion = None
+
+
+
+            else:
+
+                if click_square == (promotion.file, promotion.rank):
+
+                    board.append(Queen(promotion.file, promotion.rank, promotion.colour))
+
+                    for piece in board:
+
+                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                            board.remove(piece)
+
+                    promotion = None
+
+                elif click_square == (promotion.file, promotion.rank + 1):
+
+                    board.append(Knight(promotion.file, promotion.rank, promotion.colour))
+
+                    for piece in board:
+
+                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                            board.remove(piece)
+
+                    promotion = None
+                elif click_square == (promotion.file, promotion.rank + 2):
+
+                    board.append(Rook(promotion.file, promotion.rank, promotion.colour))
+
+                    for piece in board:
+
+                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                            board.remove(piece)
+
+                    promotion = None
+                elif click_square == (promotion.file, promotion.rank + 3):
+
+                    board.append(Bishop(promotion.file, promotion.rank, promotion.colour))
+
+                    for piece in board:
+
+                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                            board.remove(piece)
+
+                    promotion = None
+                elif click_square == (promotion.file,promotion.rank + 4):
+
+                    self.file = self.previous_file
+
+                    self.rank = self.previous_rank
+
+                    promotion = None
+
 
         for piece in board:
 
@@ -1160,7 +1295,6 @@ class ChessGame:
                 # If the clicked square is literally empty, it deselects the selected piece
 
                 selected_piece = None
-
 
     def draw_piece(self, piece, file, rank):
 
@@ -1272,10 +1406,17 @@ class ChessGame:
 
                 self.draw_piece("b", promotion.file, promotion.rank + 3)
 
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank - 4), unit, unit))
+
+                text_surface = font.render("X", True, (0, 0, 0))
+
+                screen.blit(text_surface, (convert_into_pos(promotion.file, promotion.rank - 4)[0] + unit//4, convert_into_pos(promotion.file, promotion.rank - 4)[1]))
 
     def run(self):
         global selected_piece, turn
+
         running = True
+
         while running:
 
             for event in pygame.event.get():
