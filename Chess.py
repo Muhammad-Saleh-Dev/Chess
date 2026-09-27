@@ -325,9 +325,6 @@ class Piece:
 
 
         if is_piece_on_square(new_file, new_rank):
-
-            print("called is piece on square")
-
             if promotion == None:
 
                 piece_to_remove = get_piece_on_square(new_file, new_rank)
@@ -1142,6 +1139,8 @@ class ChessGame:
     def check_where_clicked(self, event):
         global selected_piece, turn, promotion
 
+        print(f"clicked, {board}\n\n\n")
+
         changed = False
 
         click_square = convert_into_file_rank(*event.pos)
@@ -1208,8 +1207,6 @@ class ChessGame:
 
                     self.rank = self.previous_rank
 
-                    promotion = None
-
 
 
             else:
@@ -1268,6 +1265,8 @@ class ChessGame:
                     promotion = None
 
 
+# This part checks if the selected piece got changed or not
+
         for piece in board:
 
             if (piece.file, piece.rank)== click_square and piece.colour == turn:
@@ -1278,8 +1277,9 @@ class ChessGame:
 
                 selected_piece = piece
             if piece == board[-1] and not changed:
-                    # This if block check if the selected piece has legal moves on the selected
-                    # square and if it does, it moves the piece to that square
+
+# This if block check if the selected piece has legal moves on the selected
+# square and if it does, it moves the piece to that square
 
 
                 if selected_piece is not None:
@@ -1386,8 +1386,6 @@ class ChessGame:
 
                 screen.blit(text_surface, (convert_into_pos(promotion.file, promotion.rank - 4)[0] + unit//4, convert_into_pos(promotion.file, promotion.rank - 4)[1]))
 
-
-
             else:
 
                 pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank), unit, unit))
@@ -1430,6 +1428,10 @@ class ChessGame:
                     self.check_where_clicked(event)
 
             self.draw_board()
+
+            if len(board) < 32:
+
+                print("this is where")
 
             if selected_piece is not None:
 
