@@ -215,6 +215,8 @@ def find_safe_moves():
 
                     captured_piece = get_piece_on_square(legal_move[0], legal_move[1])
 
+                    print(2)
+
                     board.remove(captured_piece)
 
                 else:
@@ -329,7 +331,11 @@ class Piece:
 
                 piece_to_remove = get_piece_on_square(new_file, new_rank)
 
-                board.remove(piece_to_remove)
+                if piece_to_remove is not self:
+
+                    print(3)
+
+                    board.remove(piece_to_remove)
 
 
         if self.colour == "w":
@@ -1159,45 +1165,53 @@ class ChessGame:
 
                         if (piece.file, piece.rank) == (promotion.file, promotion.rank):
 
+                            print(4)
+
                             board.remove(piece)
 
                     promotion = None
 
                 elif click_square == (promotion.file, promotion.rank - 1):
 
-                    board.append(Knight(promotion.file, promotion.rank, promotion.colour))
-
                     for piece in board:
 
                         if (piece.file, piece.rank) == (promotion.file, promotion.rank):
 
+                            print(5)
+
                             board.remove(piece)
+
+                    board.append(Knight(promotion.file, promotion.rank, promotion.colour))
 
                     promotion = None
 
 
                 elif click_square == (promotion.file, promotion.rank - 2):
-
-                    board.append(Rook(promotion.file, promotion.rank, promotion.colour))
-
                     for piece in board:
 
                         if (piece.file, piece.rank) == (promotion.file, promotion.rank):
 
+                            print(6)
+
                             board.remove(piece)
+
+                    board.append(Rook(promotion.file, promotion.rank, promotion.colour))
 
                     promotion = None
 
 
                 elif click_square == (promotion.file, promotion.rank - 3):
 
-                    board.append(Bishop(promotion.file, promotion.rank, promotion.colour))
 
                     for piece in board:
 
                         if (piece.file, piece.rank) == (promotion.file, promotion.rank):
 
+                            print(7)
+
                             board.remove(piece)
+
+                    board.append(Bishop(promotion.file, promotion.rank, promotion.colour))
 
                     promotion = None
 
@@ -1213,47 +1227,59 @@ class ChessGame:
 
                 if click_square == (promotion.file, promotion.rank):
 
-                    board.append(Queen(promotion.file, promotion.rank, promotion.colour))
 
                     for piece in board:
 
                         if (piece.file, piece.rank) == (promotion.file, promotion.rank):
 
+                            print(8)
+
                             board.remove(piece)
 
+                    board.append(Queen(promotion.file, promotion.rank, promotion.colour))
                     promotion = None
 
                 elif click_square == (promotion.file, promotion.rank + 1):
 
-                    board.append(Knight(promotion.file, promotion.rank, promotion.colour))
 
                     for piece in board:
 
                         if (piece.file, piece.rank) == (promotion.file, promotion.rank):
 
+                            print(9)
+
                             board.remove(piece)
+
+                    board.append(Knight(promotion.file, promotion.rank, promotion.colour))
 
                     promotion = None
                 elif click_square == (promotion.file, promotion.rank + 2):
 
-                    board.append(Rook(promotion.file, promotion.rank, promotion.colour))
 
                     for piece in board:
 
                         if (piece.file, piece.rank) == (promotion.file, promotion.rank):
 
+                            print(10)
+
                             board.remove(piece)
+
+                    board.append(Rook(promotion.file, promotion.rank, promotion.colour))
 
                     promotion = None
                 elif click_square == (promotion.file, promotion.rank + 3):
 
-                    board.append(Bishop(promotion.file, promotion.rank, promotion.colour))
 
                     for piece in board:
 
                         if (piece.file, piece.rank) == (promotion.file, promotion.rank):
 
+                            print(11)
+
                             board.remove(piece)
+
+                    board.append(Bishop(promotion.file, promotion.rank, promotion.colour))
+
 
                     promotion = None
                 elif click_square == (promotion.file,promotion.rank + 4):
@@ -1428,10 +1454,6 @@ class ChessGame:
                     self.check_where_clicked(event)
 
             self.draw_board()
-
-            if len(board) < 32:
-
-                print("this is where")
 
             if selected_piece is not None:
 
