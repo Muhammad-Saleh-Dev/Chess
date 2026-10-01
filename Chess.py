@@ -482,7 +482,7 @@ class Queen(Piece):
             # To the Right
             for i in range(self.file + 1, 9):
 
-                if self.file + 1 < 9 and self.rank + 1 < 9:
+                if self.file + 1 < 9:
 
                     if is_piece_on_square(i, self.rank):
 
@@ -500,7 +500,7 @@ class Queen(Piece):
 
             for i in range(self.file - 1, 0, -1):
 
-                if self.file - 1 > 0 and self.rank - 1 > 0:
+                if self.file - 1 > 0:
 
                     if is_piece_on_square(i, self.rank):
 
@@ -516,7 +516,7 @@ class Queen(Piece):
             # For Up
             for i in range(self.rank + 1, 9):
 
-                if self.file + 1 < 9 and self.rank + 1 < 9:
+                if self.rank + 1 < 9:
 
                     if is_piece_on_square(self.file, i):
 
@@ -533,7 +533,7 @@ class Queen(Piece):
 
             for i in range(self.rank - 1 , 0, -1):
 
-                if self.file + 1 < 9 and self.rank - 1 > 0:
+                if self.rank - 1 > 0:
 
                     if is_piece_on_square(self.file, i):
 
@@ -1189,6 +1189,8 @@ class ChessGame:
 
                         board.append(promotion.piece_to_remove)
 
+                    turn = promotion.colour
+
                     promotion = None
 
 
@@ -1254,9 +1256,9 @@ class ChessGame:
 
                         board.append(promotion.piece_to_remove)
 
-                    promotion = None
-
                     turn = promotion.colour
+
+                    promotion = None
 
 
 # This part checks if the selected piece got changed or not
@@ -1398,11 +1400,11 @@ class ChessGame:
 
                 self.draw_piece("b", promotion.file, promotion.rank + 3)
 
-                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank - 4), unit, unit))
+                pygame.draw.rect(screen, white, (*convert_into_pos(promotion.file, promotion.rank + 4), unit, unit))
 
                 text_surface = font.render("X", True, (0, 0, 0))
 
-                screen.blit(text_surface, (convert_into_pos(promotion.file, promotion.rank - 4)[0] + unit//4, convert_into_pos(promotion.file, promotion.rank - 4)[1]))
+                screen.blit(text_surface, (convert_into_pos(promotion.file, promotion.rank + 4)[0] + unit//4, convert_into_pos(promotion.file, promotion.rank + 4)[1]))
 
     def run(self):
         global selected_piece, turn
