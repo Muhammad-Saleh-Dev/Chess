@@ -1,8 +1,9 @@
 import sys
+from webbrowser import get
 
 import pygame
 
-from platform import system
+from platform import python_revision, system
 
 pygame.init()
 
@@ -258,6 +259,190 @@ def check_for_checkmate():
 
             sys.exit()
 
+def promote():
+
+    global turn, promotion
+
+    if promotion.colour == "w":
+
+        if click_square == (promotion.file, promotion.rank):
+
+            for piece in board:
+
+                if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                    board.remove(piece)
+
+            board.append(Queen(promotion.file, promotion.rank, promotion.colour))
+
+            promotion = None
+
+        elif click_square == (promotion.file, promotion.rank - 1):
+
+            for piece in board:
+
+                if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                    print(5)
+
+                    board.remove(piece)
+
+            board.append(Knight(promotion.file, promotion.rank, promotion.colour))
+
+            promotion = None
+
+
+        elif click_square == (promotion.file, promotion.rank - 2):
+            for piece in board:
+
+                if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                    board.remove(piece)
+
+            board.append(Rook(promotion.file, promotion.rank, promotion.colour))
+
+            promotion = None
+
+
+        elif click_square == (promotion.file, promotion.rank - 3):
+
+
+            for piece in board:
+
+                if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                    board.remove(piece)
+
+            board.append(Bishop(promotion.file, promotion.rank, promotion.colour))
+
+            promotion = None
+
+        elif click_square == (promotion.file,promotion.rank -4):
+
+            promotion.file = promotion.previous_file
+
+            promotion.rank = promotion.previous_rank
+
+            if promotion.piece_to_remove != None:
+
+                board.append(promotion.piece_to_remove)
+
+            turn = promotion.colour
+
+            promotion = None
+
+
+
+    else:
+
+        if click_square == (promotion.file, promotion.rank):
+
+
+            for piece in board:
+
+                if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                    board.remove(piece)
+
+            board.append(Queen(promotion.file, promotion.rank, promotion.colour))
+
+            promotion = None
+
+        elif click_square == (promotion.file, promotion.rank + 1):
+
+            for piece in board:
+
+                if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                    board.remove(piece)
+
+            board.append(Knight(promotion.file, promotion.rank, promotion.colour))
+
+            promotion = None
+        elif click_square == (promotion.file, promotion.rank + 2):
+
+
+            for piece in board:
+
+                if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                    board.remove(piece)
+
+            board.append(Rook(promotion.file, promotion.rank, promotion.colour))
+
+            promotion = None
+        elif click_square == (promotion.file, promotion.rank + 3):
+
+
+            for piece in board:
+
+                if (piece.file, piece.rank) == (promotion.file, promotion.rank):
+
+                    board.remove(piece)
+
+            board.append(Bishop(promotion.file, promotion.rank, promotion.colour))
+
+
+            promotion = None
+        elif click_square == (promotion.file,promotion.rank + 4):
+
+            promotion.file = promotion.previous_file
+
+            promotion.rank = promotion.previous_rank
+
+            if promotion.piece_to_remove != None:
+
+                board.append(promotion.piece_to_remove)
+
+            turn = promotion.colour
+
+            promotion = None
+
+def will_be_check(piece, new_file, new_rank):
+
+    piece.previous_file = piece.file
+
+    piece.previous_rank = piece.rank
+
+    piece.file = new_file
+
+    piece.rank = new_rank
+
+    piece.pos_x, piece.pos_y = convert_into_pos(piece.file, piece.rank)
+
+    if is_piece_on_square(new_file, new_rank):
+
+        piece_to_remove = get_piece_on_square(new_file, new_rank)
+
+        board.remove(piece_to_remove)
+
+    if is_check():
+
+        piece.file = piece.previous_file
+
+        piece.rank = piece.previous_rank
+
+        piece.pos_x, piece.pos_y = convert_into_pos(piece.file, piece.rank)
+
+        if piece_to_remove:
+
+            board.append(piece_to_remove)
+
+        return True
+
+    else:
+
+        piece.file = piece.previous_file
+
+        piece.rank = piece.previous_rank
+
+        piece.pos_x, piece.pos_y = convert_into_pos(piece.file, piece.rank)
+
+        if piece_to_remove:
+
+            board.append(piece_to_remove)
+
+        return False
 
 
 class Piece:
@@ -340,9 +525,28 @@ class Piece:
 
         if checked is None:
 
+            print(1)
+
+            # This part filters out legal moves that would put the king in check
+            temp = []
+
+            for legal_move in self.legal_moves:
+
+                if not will_be_check(self, legal_move[0], legal_move[1]):
+
+                    temp.append(legal_move)
+
+            self.legal_moves = temp
+
             moves_to_draw = self.legal_moves
 
+        # if checked is None:
+
+        #     moves_to_draw = self.legal_moves
+
         else:
+
+            print(2)
 
             find_safe_moves()
 
@@ -1123,143 +1327,7 @@ class ChessGame:
 
         if not (promotion == None):
 
-            print("promotion not none")
-
-            if promotion.colour == "w":
-
-                if click_square == (promotion.file, promotion.rank):
-
-                    for piece in board:
-
-                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
-
-                            board.remove(piece)
-
-                    board.append(Queen(promotion.file, promotion.rank, promotion.colour))
-
-                    promotion = None
-
-                elif click_square == (promotion.file, promotion.rank - 1):
-
-                    for piece in board:
-
-                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
-
-                            print(5)
-
-                            board.remove(piece)
-
-                    board.append(Knight(promotion.file, promotion.rank, promotion.colour))
-
-                    promotion = None
-
-
-                elif click_square == (promotion.file, promotion.rank - 2):
-                    for piece in board:
-
-                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
-
-                            board.remove(piece)
-
-                    board.append(Rook(promotion.file, promotion.rank, promotion.colour))
-
-                    promotion = None
-
-
-                elif click_square == (promotion.file, promotion.rank - 3):
-
-
-                    for piece in board:
-
-                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
-
-                            board.remove(piece)
-
-                    board.append(Bishop(promotion.file, promotion.rank, promotion.colour))
-
-                    promotion = None
-
-                elif click_square == (promotion.file,promotion.rank -4):
-
-                    promotion.file = promotion.previous_file
-
-                    promotion.rank = promotion.previous_rank
-
-                    if promotion.piece_to_remove != None:
-
-                        board.append(promotion.piece_to_remove)
-
-                    turn = promotion.colour
-
-                    promotion = None
-
-
-
-            else:
-
-                if click_square == (promotion.file, promotion.rank):
-
-
-                    for piece in board:
-
-                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
-
-                            board.remove(piece)
-
-                    board.append(Queen(promotion.file, promotion.rank, promotion.colour))
-
-                    promotion = None
-
-                elif click_square == (promotion.file, promotion.rank + 1):
-
-                    for piece in board:
-
-                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
-
-                            board.remove(piece)
-
-                    board.append(Knight(promotion.file, promotion.rank, promotion.colour))
-
-                    promotion = None
-                elif click_square == (promotion.file, promotion.rank + 2):
-
-
-                    for piece in board:
-
-                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
-
-                            board.remove(piece)
-
-                    board.append(Rook(promotion.file, promotion.rank, promotion.colour))
-
-                    promotion = None
-                elif click_square == (promotion.file, promotion.rank + 3):
-
-
-                    for piece in board:
-
-                        if (piece.file, piece.rank) == (promotion.file, promotion.rank):
-
-                            board.remove(piece)
-
-                    board.append(Bishop(promotion.file, promotion.rank, promotion.colour))
-
-
-                    promotion = None
-                elif click_square == (promotion.file,promotion.rank + 4):
-
-                    promotion.file = promotion.previous_file
-
-                    promotion.rank = promotion.previous_rank
-
-                    if promotion.piece_to_remove != None:
-
-                        board.append(promotion.piece_to_remove)
-
-                    turn = promotion.colour
-
-                    promotion = None
-
+            promote()
 
 # This part checks if the selected piece got changed or not
 
