@@ -1,9 +1,10 @@
 import sys
-from webbrowser import get
+
+from inspect import currentframe
 
 import pygame
 
-from platform import python_revision, system
+from platform import system
 
 pygame.init()
 
@@ -216,8 +217,6 @@ def find_safe_moves():
 
                     captured_piece = get_piece_on_square(legal_move[0], legal_move[1])
 
-                    print(2)
-
                     board.remove(captured_piece)
 
                 else:
@@ -282,8 +281,6 @@ def promote():
             for piece in board:
 
                 if (piece.file, piece.rank) == (promotion.file, promotion.rank):
-
-                    print(5)
 
                     board.remove(piece)
 
@@ -400,6 +397,8 @@ def promote():
 
 def will_be_check(piece, new_file, new_rank):
 
+    global turn
+
     piece.previous_file = piece.file
 
     piece.previous_rank = piece.rank
@@ -444,7 +443,39 @@ def will_be_check(piece, new_file, new_rank):
 
         return False
 
+def find_common_king_moves():
 
+    for piece in board:
+
+        if piece.type == "king":
+
+            if piece.colour == "w":
+
+                white_king = piece
+
+            else:
+
+                black_king = piece
+
+    white_king.calculate_legal_moves()
+
+def remove_common_king_moves(self):
+
+    for piece in board:
+
+        if piece.type == "king" and piece.colour != self.colour:
+
+            self.calculate_legal_moves()
+
+            piece.calculate_legal_moves()
+
+            for legal_move in piece.legal_moves:
+
+                if legal_move in self.legal_moves:
+
+                    piece.legal_moves.remove(legal_move)
+
+                    self.legal_moves.remove(legal_move)
 class Piece:
 
     def __init__(self, file, rank, colour):
@@ -523,34 +554,32 @@ class Piece:
 
         self.calculate_legal_moves()
 
-        if checked is None:
-
-            print(1)
-
-            # This part filters out legal moves that would put the king in check
-            temp = []
-
-            for legal_move in self.legal_moves:
-
-                if not will_be_check(self, legal_move[0], legal_move[1]):
-
-                    temp.append(legal_move)
-
-            self.legal_moves = temp
-
-            moves_to_draw = self.legal_moves
-
         # if checked is None:
+
+        #     # This part filters out legal moves that would put the king in check
+        #     temp = []
+
+        #     for legal_move in self.legal_moves:
+
+        #         if not will_be_check(self, legal_move[0], legal_move[1]):
+
+        #             temp.append(legal_move)
+
+        #     self.legal_moves = temp
 
         #     moves_to_draw = self.legal_moves
 
-        else:
+        if checked is None:
 
-            print(2)
+            moves_to_draw = self.legal_moves
+
+        else:
 
             find_safe_moves()
 
             moves_to_draw = [m for m in self.legal_moves if (self, m) in safe_moves]
+
+            self.legal_moves = moves_to_draw
 
         for legal_move in moves_to_draw:
 
@@ -1006,7 +1035,6 @@ class Bishop(Piece):
 
                         self.legal_moves.append((self.file + i, self.rank - i))
 
-
 class Knight(Piece):
     def __init__(self, file, rank, colour):
 
@@ -1294,13 +1322,35 @@ class King(Piece):
             # Ts part for removing the king's legal moves that would put it in check.
             # It checks if any of the king's legal moves are on the same square as an
             # opponent's king and removes those moves from the king's legal moves.
-            for piece in board:
+            #
 
-                if piece.type == "king" and piece.colour != self.colour:
+            if not currentframe().f_back.f_code.co_name == "remove_common_king_moves":
 
-                    if (piece.file, piece.rank) in self.legal_moves:
+                remove_common_king_moves(self)
 
-                        self.legal_moves.remove((piece.file, piece.rank))
+
+
+            # if self.colour == "w":
+
+            #     white_king = self
+
+            #     for piece in board:
+
+            #         if piece.type == "king" and piece.colour != self.colour:
+
+            #             black_king = piece
+
+            # else:
+
+            #     black_king = self
+
+            #     for piece in board:
+
+            #         if piece.type == "king" and piece.colour != self.colour:
+
+            #             white_king = piece
+
+
 
 
 
