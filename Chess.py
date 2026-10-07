@@ -1,6 +1,7 @@
 import sys
 
 from inspect import currentframe
+from webbrowser import get
 
 import pygame
 
@@ -95,10 +96,10 @@ def get_piece_on_square(file, rank):
 
             return piece
 
-def is_dangerous(file, rank):
+def is_dangerous(file, rank, colour):
     global all_dangerous_moves
 
-    calculate_all_dangerous_moves()
+    calculate_all_dangerous_moves(colour)
 
     # for piece in board:
 
@@ -113,10 +114,10 @@ def is_dangerous(file, rank):
 
     return False
 
-def is_check():
+def is_check(colour):
     for king in board:
 
-        if king.type == "king" and king.colour == turn:
+        if king.type == "king" and king.colour == colour:
 
             for piece in board:
 
@@ -134,37 +135,29 @@ def is_check():
             break
     return False
 
-def calculate_all_dangerous_moves():
+def calculate_all_dangerous_moves(colour):
     global all_dangerous_moves
 
     all_dangerous_moves = []
 
     for piece in board:
 
-        if piece.colour != turn:
+        if piece.colour != colour and piece.type != "king":
 
-            if piece.type != "king":
+            if piece.type == "pawn":
 
-                if piece.type == "pawn":
-                    piece.legal_moves = []
-                    # for move in piece.legal_moves:
+                piece.legal_moves = []
 
-                        # if move[0] == piece.file:
+                if piece.colour == "w":
 
-                        #     piece.legal_moves.remove(move)
+                    piece.legal_moves.extend([(piece.file + 1, piece.rank + 1),
+                                          (piece.file - 1, piece.rank + 1)])
+                elif piece.colour == "b":
 
-                    if piece.colour == "w":
+                    piece.legal_moves.extend([(piece.file + 1, piece.rank - 1),
+                                          (piece.file - 1, piece.rank - 1)])
 
-                        piece.legal_moves.extend([(piece.file + 1, piece.rank + 1),
-
-                                                  (piece.file - 1, piece.rank + 1)])
-                    elif piece.colour == "b":
-
-                        piece.legal_moves.extend([(piece.file + 1, piece.rank - 1),
-
-                                                  (piece.file - 1, piece.rank - 1)])
-
-                elif piece.type == "queen" or piece.type == "rook" or piece.type == "bishop":
+            elif piece.type == "queen" or piece.type == "rook" or piece.type == "bishop":
 
                     for piece_1 in board:
 
@@ -184,24 +177,24 @@ def calculate_all_dangerous_moves():
 
                     piece.calculate_legal_moves()
 
-                else:
+            else:
                     piece.legal_moves = []
 
                     piece.calculate_legal_moves()
 
 
-                all_dangerous_moves.extend(piece.legal_moves)
+            all_dangerous_moves.extend(piece.legal_moves)
 
-def find_safe_moves():
+def find_safe_moves(colour):
     global safe_moves, turn
 
     safe_moves = []
 
-    king_colour = turn
+    king_colour = colour
 
     for piece in board:
 
-        if piece.colour == turn:
+        if piece.colour == king_colour:
 
             piece.legal_moves = []
 
@@ -235,7 +228,7 @@ def find_safe_moves():
                 piece.pos_x, piece.pos_y = convert_into_pos(piece.file, piece.rank)
 
 
-                if not is_check():
+                if not is_check(turn):
 
                     safe_moves.append((piece, legal_move))
 
@@ -252,7 +245,7 @@ def find_safe_moves():
 
 def check_for_checkmate():
 
-    find_safe_moves()
+    find_safe_moves(turn)
 
     if len(safe_moves) == 0:
 
@@ -415,7 +408,7 @@ def will_be_check(piece, new_file, new_rank):
 
         board.remove(piece_to_remove)
 
-    if is_check():
+    if is_check(turn):
 
         piece.file = piece.previous_file
 
@@ -465,17 +458,76 @@ def remove_common_king_moves(self):
 
         if piece.type == "king" and piece.colour != self.colour:
 
+            print("HEy ngga")
+
             self.calculate_legal_moves()
 
             piece.calculate_legal_moves()
 
-            for legal_move in piece.legal_moves:
+            for legal_move in piece.legal_moves.copy():
 
-                if legal_move in self.legal_moves:
+                for legal_move2 in self.legal_moves.copy():
 
-                    piece.legal_moves.remove(legal_move)
+                        if (legal_move[0], legal_move[1]) == (legal_move2[0], legal_move2[1]):
 
-                    self.legal_moves.remove(legal_move)
+                            self.legal_moves.remove(legal_move2)
+
+                            break
+            break
+
+def does_put_in_check(self, new_file, new_rank):
+
+    piece_to_remove = None
+
+    if is_piece_on_square(new_file, new_rank):
+
+        piece_to_remove = get_piece_on_square(new_file, new_rank)
+
+        if piece_to_remove != self:
+
+            board.remove(piece_to_remove)
+
+    previous_file = self.file
+
+    previous_rank = self.rank
+
+    self.file = new_file
+
+    self.rank = new_rank
+
+    self.pos_x, self.pos_y = convert_into_pos(self.file, self.rank)
+
+    if is_check(self.colour):
+
+        self.file = previous_file
+
+        self.rank = previous_rank
+
+        self.pos_x, self.pos_y = convert_into_pos(self.file, self.rank)
+
+        if piece_to_remove != None:
+
+            board.append(piece_to_remove)
+
+        return True
+
+    else:
+
+        self.file = previous_file
+
+        self.rank = previous_rank
+
+        self.pos_x, self.pos_y = convert_into_pos(self.file, self.rank)
+
+        if piece_to_remove != None:
+
+            board.append(piece_to_remove)
+
+        return False
+
+
+
+
 class Piece:
 
     def __init__(self, file, rank, colour):
@@ -499,6 +551,10 @@ class Piece:
         self.previous_file = self.file
 
         self.previous_rank = self.rank
+
+        if self.type == "king" or self.type == "rook":
+
+            self.castlable = False
 
         if is_piece_on_square(new_file, new_rank):
 
@@ -537,7 +593,7 @@ class Piece:
 
             piece.legal_moves = []
 
-        if is_check():
+        if is_check(self.colour):
             if self.colour == "w":
 
                 checked = "b"
@@ -553,6 +609,19 @@ class Piece:
     def see_legal_moves(self):
 
         self.calculate_legal_moves()
+
+        temp = []
+
+        for legal_move in self.legal_moves:
+
+            if not does_put_in_check(self, legal_move[0], legal_move[1]):
+
+                temp.append(legal_move)
+        self.legal_moves = temp
+
+        if self.type == "king":
+
+            check_for_checkmate()
 
         # if checked is None:
 
@@ -575,7 +644,7 @@ class Piece:
 
         else:
 
-            find_safe_moves()
+            find_safe_moves(turn)
 
             moves_to_draw = [m for m in self.legal_moves if (self, m) in safe_moves]
 
@@ -864,6 +933,8 @@ class Rook(Piece):
         super().__init__(file, rank, colour)
 
         self.type = "rook"
+
+        self.castlable = True
 
         if colour == "w":
 
@@ -1181,6 +1252,8 @@ class King(Piece):
 
         self.type = "king"
 
+        self.castlable = True
+
         if colour == "w":
 
             self.symbol = "K"
@@ -1195,7 +1268,7 @@ class King(Piece):
         if len(self.legal_moves) == 0:
             # To the Top right
             if self.file + 1 < 9 and self.rank + 1 < 9:
-                if not is_dangerous(self.file + 1, self.rank + 1):
+                if not is_dangerous(self.file + 1, self.rank + 1, self.colour):
 
                     if is_piece_on_square(self.file + 1, self.rank + 1):
 
@@ -1210,7 +1283,7 @@ class King(Piece):
             # To the bottom right
             if self.file + 1 < 9 and self.rank - 1 > 0:
 
-                if not is_dangerous(self.file + 1, self.rank - 1):
+                if not is_dangerous(self.file + 1, self.rank - 1, self.colour):
 
                     if is_piece_on_square(self.file + 1, self.rank - 1):
 
@@ -1226,7 +1299,7 @@ class King(Piece):
             # To the Right
             if self.file + 1 < 9:
 
-                if not is_dangerous(self.file + 1, self.rank):
+                if not is_dangerous(self.file + 1, self.rank, self.colour):
 
                     if is_piece_on_square(self.file + 1, self.rank):
 
@@ -1243,7 +1316,7 @@ class King(Piece):
 
             if self.file - 1 > 0 and self.rank + 1 < 9:
 
-                if not is_dangerous(self.file - 1, self.rank + 1):
+                if not is_dangerous(self.file - 1, self.rank + 1, self.colour):
 
                     if is_piece_on_square(self.file - 1, self.rank + 1):
 
@@ -1259,7 +1332,7 @@ class King(Piece):
             # To the Bottom Left
             if self.file - 1 > 0 and self.rank - 1 > 0:
 
-                if not is_dangerous(self.file - 1, self.rank - 1):
+                if not is_dangerous(self.file - 1, self.rank - 1, self.colour):
 
                     if is_piece_on_square(self.file - 1, self.rank - 1):
 
@@ -1274,7 +1347,7 @@ class King(Piece):
             # To the Left
             if self.file - 1 > 0:
 
-                if not is_dangerous(self.file - 1, self.rank):
+                if not is_dangerous(self.file - 1, self.rank, self.colour):
 
                     if is_piece_on_square(self.file - 1, self.rank):
 
@@ -1290,9 +1363,7 @@ class King(Piece):
             # To the Bottom
             if self.rank - 1 > 0:
 
-                if not is_dangerous(self.file, self.rank - 1):
-
-                    is_dangerous(self.file, self.rank - 1)
+                if not is_dangerous(self.file, self.rank - 1, self.colour):
 
                     if is_piece_on_square(self.file, self.rank - 1):
 
@@ -1307,7 +1378,7 @@ class King(Piece):
             # To the Top
             if self.rank + 1 < 9:
 
-                if not is_dangerous(self.file, self.rank + 1):
+                if not is_dangerous(self.file, self.rank + 1, self.colour):
 
                     if is_piece_on_square(self.file, self.rank + 1):
 
@@ -1319,40 +1390,56 @@ class King(Piece):
                     else:
                         self.legal_moves.append((self.file, self.rank + 1))
 
+            if self.castlable:
+
+                # Right side castling
+
+                if not (is_piece_on_square(6, self.rank) or is_piece_on_square(7, self.rank)) and is_piece_on_square(8, self.rank):
+
+                    if (not is_check(turn)) and not(is_dangerous(6, self.rank, self.colour) or is_dangerous(7, self.rank, self.colour)) :
+
+                        rook = get_piece_on_square(8, self.rank)
+
+                        if rook.type == "rook":
+
+                            if rook.castlable:
+
+                                self.legal_moves.append((7, self.rank, "castling"))
+                # Left side castling
+
+                if not (is_piece_on_square(4, self.rank) or is_piece_on_square(3, self.rank) or is_piece_on_square(2, self.rank)) and is_piece_on_square(1, self.rank):
+
+                    if (not is_check(turn)) and not(is_dangerous(4, self.rank, self.colour) or is_dangerous(3, self.rank, self.colour)) :
+
+                        rook = get_piece_on_square(1, self.rank)
+
+                        if rook.type == "rook":
+
+                            if rook.castlable:
+
+                                self.legal_moves.append((3, self.rank, "castling"))
+
             # Ts part for removing the king's legal moves that would put it in check.
             # It checks if any of the king's legal moves are on the same square as an
             # opponent's king and removes those moves from the king's legal moves.
             #
 
-            if not currentframe().f_back.f_code.co_name == "remove_common_king_moves":
+            if currentframe().f_back.f_code.co_name != "remove_common_king_moves":
 
                 remove_common_king_moves(self)
 
 
+    def castling(self, colour, rook):
+        if rook.file == 8:
 
-            # if self.colour == "w":
+            rook.file -= 2
 
-            #     white_king = self
+            self.file += 2
+        elif rook.file == 1:
 
-            #     for piece in board:
+            rook.file += 3
 
-            #         if piece.type == "king" and piece.colour != self.colour:
-
-            #             black_king = piece
-
-            # else:
-
-            #     black_king = self
-
-            #     for piece in board:
-
-            #         if piece.type == "king" and piece.colour != self.colour:
-
-            #             white_king = piece
-
-
-
-
+            self.file -= 2
 
 board = [(Rook(1, 1, "w")), (Knight(2, 1, "w")), (Bishop(3, 1, "w")), (Queen(4, 1, "w")), (King(5, 1, "w")), (Bishop(6, 1, "w")), (Knight(7, 1, "w")), (Rook(8, 1, "w")),
 
