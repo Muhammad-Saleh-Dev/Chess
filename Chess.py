@@ -1,7 +1,6 @@
 import sys
 
 from inspect import currentframe
-from webbrowser import get
 
 import pygame
 
@@ -121,7 +120,7 @@ def is_check(colour):
 
             for piece in board:
 
-                if piece.colour != king.colour:
+                if piece.colour != king.colour and piece.type != "king":
 
                     piece.legal_moves = []
 
@@ -164,8 +163,6 @@ def calculate_all_dangerous_moves(colour):
                         if piece_1.type == "king" and piece_1.colour != piece.colour:
 
                             board.remove(piece_1)
-
-
 
                             piece.legal_moves = []
 
@@ -251,7 +248,7 @@ def check_for_checkmate():
 
             sys.exit()
 
-def promote():
+def promote(click_square):
 
     global turn, promotion
 
@@ -458,8 +455,6 @@ def remove_common_king_moves(self):
 
         if piece.type == "king" and piece.colour != self.colour:
 
-            print("HEy ngga")
-
             self.calculate_legal_moves()
 
             piece.calculate_legal_moves()
@@ -656,7 +651,7 @@ class Piece:
 
                 pygame.draw.rect(screen, yellow, (*convert_into_pos(legal_move[0], legal_move[1]), unit, unit), 4)
 
-            elif "protect" not in legal_move:
+            elif not ("protect" in legal_move):
 
                 pygame.draw.circle(screen, green, convert_into_pos_for_circles(legal_move[0], legal_move[1]), 10)
 
@@ -734,32 +729,6 @@ class Pawn(Piece):
 
                     self.legal_moves.append((self.file - 1, self.rank - 1, "capture"))
 
-
-    def promotion(self):
-
-        global promotion_time
-
-        while promotion_time:
-
-            if self.colour == "w":
-
-                chess_game.draw_piece("q", self.file, self.rank)
-
-                chess_game.draw_piece("r", self.file, self.rank - 1)
-
-                chess_game.draw_piece("b", self.file, self.rank - 2)
-
-                chess_game.draw_piece("n", self.file, self.rank - 3)
-
-            elif self.colour == "b":
-
-                chess_game.draw_piece("Q", self.file, self.rank)
-
-                chess_game.draw_piece("R", self.file, self.rank + 1)
-
-                chess_game.draw_piece("B", self.file, self.rank + 2)
-
-                chess_game.draw_piece("N", self.file, self.rank + 3)
 
 class Queen(Piece):
     def __init__(self, file, rank, colour):
@@ -1430,6 +1399,9 @@ class King(Piece):
 
 
     def castling(self, colour, rook):
+
+        global turn
+
         if rook.file == 8:
 
             rook.file -= 2
@@ -1440,6 +1412,16 @@ class King(Piece):
             rook.file += 3
 
             self.file -= 2
+
+        turn = "w" if self.colour == "b" else "b"
+
+        self.castlable = False
+
+        rook.castlable = False
+
+        for piece in board:
+
+            piece.legal_moves = []
 
 board = [(Rook(1, 1, "w")), (Knight(2, 1, "w")), (Bishop(3, 1, "w")), (Queen(4, 1, "w")), (King(5, 1, "w")), (Bishop(6, 1, "w")), (Knight(7, 1, "w")), (Rook(8, 1, "w")),
 
@@ -1464,7 +1446,7 @@ class ChessGame:
 
         if not (promotion == None):
 
-            promote()
+            promote(click_square)
 
 # This part checks if the selected piece got changed or not
 
@@ -1492,6 +1474,18 @@ class ChessGame:
                             selected_piece.legal_moves = []
 
                             selected_piece = None
+
+                        elif ((*click_square, "castling") in selected_piece.legal_moves):
+
+                            if click_square[0]==7:
+
+                                rook = get_piece_on_square(8, selected_piece.rank)
+
+                            elif click_square[0]==3:
+
+                                rook = get_piece_on_square(1, selected_piece.rank)
+
+                            selected_piece.castling(selected_piece.colour, rook)
 
                 # If the clicked square is literally empty, it deselects the selected piece
 
